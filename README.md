@@ -14,10 +14,10 @@ microservices orientée événements**.
 ```
 betamis/
 ├── prediction-service/    # Soumission et gestion des pronostics (Quarkus)
-├── match-service/         # Données et résultats des matchs (Spring Boot)
+├── match-service/         # Données et résultats des matchs (Quarkus)
 ├── scoring-service/       # Calcul des points et classements
 ├── league-service/        # Gestion des ligues et groupes d'amis
-├── notification-service/  # Notifications email (Spring Boot)
+├── notification-service/  # Notifications email (Quarkus)
 ├── frontend/              # Interface utilisateur
 ├── schemas/avro/          # Schémas Avro des événements Kafka
 ├── helm/                  # Charts Kubernetes
@@ -47,7 +47,7 @@ Services démarrés :
 | Sujet | Décision | ADR |
 |-------|----------|-----|
 | prediction-service | Quarkus 3.x | [ADR-001](docs/adr/ADR-001-choix-quarkus-prediction-service.md) |
-| match / notification | Spring Boot 3.x | [ADR-001](docs/adr/ADR-001-choix-quarkus-prediction-service.md) |
+| match / notification / league / scoring | Quarkus 3.x | [ADR-001](docs/adr/ADR-001-choix-quarkus-prediction-service.md) |
 | Architecture | Hexagonale (Ports & Adapters) | [ADR-002](docs/adr/ADR-002-architecture-hexagonale.md) |
 | Communication inter-services | Apache Kafka (événements uniquement) | [ADR-003](docs/adr/ADR-003-event-driven-kafka.md) |
 | Sérialisation | Apache Avro + Schema Registry | [ADR-004](docs/adr/ADR-004-avro-schema-registry.md) |

@@ -10,7 +10,7 @@ Service de gestion des matchs de la Coupe du Monde.
 
 ## Stack technique
 
-- **Framework** : Spring Boot 3.x
+- **Framework** : [Quarkus 3.x](https://quarkus.io)
 - **Architecture** : Hexagonale (Ports & Adapters) — voir [ADR-002](../docs/adr/ADR-002-architecture-hexagonale.md)
 - **Base de données** : PostgreSQL (`match_db`)
 - **Migrations** : Flyway
@@ -50,5 +50,5 @@ match-service/
 ## Démarrage local
 
 ```bash
-./mvnw spring-boot:run
+./mvnw quarkus:dev
 ```

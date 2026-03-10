@@ -20,12 +20,11 @@ monitoring/
 
 ## Endpoints de métriques
 
-Chaque service expose ses métriques au format Prometheus :
+Tous les services exposent leurs métriques au format Prometheus via l'endpoint Quarkus :
 
 | Framework | Health | Métriques |
 |-----------|--------|-----------|
 | Quarkus | `/q/health` | `/q/metrics` |
-| Spring Boot | `/actuator/health` | `/actuator/prometheus` |
 
 ## Stack
 

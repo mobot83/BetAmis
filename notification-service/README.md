@@ -10,7 +10,7 @@ Service d'envoi de notifications aux utilisateurs.
 
 ## Stack technique
 
-- **Framework** : Spring Boot 3.x
+- **Framework** : [Quarkus 3.x](https://quarkus.io)
 - **Architecture** : Hexagonale (Ports & Adapters) — voir [ADR-002](../docs/adr/ADR-002-architecture-hexagonale.md)
 - **Email (dev)** : Mailhog — SMTP port 1025, interface web `http://localhost:8025`
 - **Messagerie** : Apache Kafka — voir [ADR-003](../docs/adr/ADR-003-event-driven-kafka.md)
@@ -48,7 +48,7 @@ notification-service/
 ## Démarrage local
 
 ```bash
-./mvnw spring-boot:run
+./mvnw quarkus:dev
 
 # Consulter les emails envoyés
 open http://localhost:8025

@@ -39,5 +39,5 @@ Service de calcul des points et gestion des classements.
 ## Démarrage local
 
 ```bash
-./mvnw spring-boot:run
+./mvnw quarkus:dev
 ```

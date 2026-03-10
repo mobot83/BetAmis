@@ -48,5 +48,5 @@ league-service/
 ## Démarrage local
 
 ```bash
-./mvnw spring-boot:run
+./mvnw quarkus:dev
 ```
