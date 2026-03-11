@@ -1,5 +1,4 @@
 # scoring-service
-
 Service de calcul des points et gestion des classements.
 
 ## Responsabilité
