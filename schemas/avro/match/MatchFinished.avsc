@@ -1,0 +1,43 @@
+{
+  "type": "record",
+  "name": "MatchFinished",
+  "namespace": "com.betamis.match.event",
+  "doc": "Emitted by match-service when a match ends and the final score is confirmed.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string",
+      "doc": "Unique event identifier (UUID)."
+    },
+    {
+      "name": "matchId",
+      "type": "string",
+      "doc": "Identifier of the finished match."
+    },
+    {
+      "name": "homeTeamId",
+      "type": "string"
+    },
+    {
+      "name": "awayTeamId",
+      "type": "string"
+    },
+    {
+      "name": "finalScore",
+      "type": {
+        "type": "record",
+        "name": "Score",
+        "namespace": "com.betamis.match.event",
+        "fields": [
+          { "name": "homeTeamScore", "type": "int" },
+          { "name": "awayTeamScore", "type": "int" }
+        ]
+      }
+    },
+    {
+      "name": "occurredAt",
+      "type": { "type": "long", "logicalType": "timestamp-millis" },
+      "doc": "Wall-clock time at which the event was produced."
+    }
+  ]
+}

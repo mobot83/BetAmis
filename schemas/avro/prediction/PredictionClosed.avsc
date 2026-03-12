@@ -1,0 +1,22 @@
+{
+  "type": "record",
+  "name": "PredictionClosed",
+  "namespace": "com.betamis.prediction.event",
+  "doc": "Emitted by prediction-service when predictions for a match are locked after kick-off.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string",
+      "doc": "Unique event identifier (UUID)."
+    },
+    {
+      "name": "matchId",
+      "type": "string"
+    },
+    {
+      "name": "occurredAt",
+      "type": { "type": "long", "logicalType": "timestamp-millis" },
+      "doc": "Wall-clock time at which the event was produced."
+    }
+  ]
+}

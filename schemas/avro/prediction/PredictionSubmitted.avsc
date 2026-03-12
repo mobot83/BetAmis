@@ -1,0 +1,42 @@
+{
+  "type": "record",
+  "name": "PredictionSubmitted",
+  "namespace": "com.betamis.prediction.event",
+  "doc": "Emitted by prediction-service when a user successfully submits a prediction.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string",
+      "doc": "Unique event identifier (UUID)."
+    },
+    {
+      "name": "predictionId",
+      "type": "string"
+    },
+    {
+      "name": "matchId",
+      "type": "string"
+    },
+    {
+      "name": "userId",
+      "type": "string"
+    },
+    {
+      "name": "score",
+      "type": {
+        "type": "record",
+        "name": "Score",
+        "namespace": "com.betamis.prediction.event",
+        "fields": [
+          { "name": "homeTeamScore", "type": "int" },
+          { "name": "awayTeamScore", "type": "int" }
+        ]
+      }
+    },
+    {
+      "name": "occurredAt",
+      "type": { "type": "long", "logicalType": "timestamp-millis" },
+      "doc": "Wall-clock time at which the event was produced."
+    }
+  ]
+}

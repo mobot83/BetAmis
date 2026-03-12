@@ -1,0 +1,35 @@
+{
+  "type": "record",
+  "name": "PointsCalculated",
+  "namespace": "com.betamis.scoring.event",
+  "doc": "Emitted by scoring-service once points are awarded for a prediction after a match finishes.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string",
+      "doc": "Unique event identifier (UUID)."
+    },
+    {
+      "name": "predictionId",
+      "type": "string"
+    },
+    {
+      "name": "userId",
+      "type": "string"
+    },
+    {
+      "name": "matchId",
+      "type": "string"
+    },
+    {
+      "name": "points",
+      "type": "int",
+      "doc": "Points awarded for this prediction (0 or positive)."
+    },
+    {
+      "name": "occurredAt",
+      "type": { "type": "long", "logicalType": "timestamp-millis" },
+      "doc": "Wall-clock time at which the event was produced."
+    }
+  ]
+}

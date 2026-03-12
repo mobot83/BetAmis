@@ -4,6 +4,7 @@ import com.betamis.prediction.domain.model.prediction.Prediction;
 import com.betamis.prediction.domain.model.score.Score;
 
 import java.time.Instant;
+import java.util.UUID;
 
 public record PredictionSubmitted(
     String id,
@@ -15,7 +16,7 @@ public record PredictionSubmitted(
 ) {
     public static PredictionSubmitted of(Prediction prediction) {
         return new PredictionSubmitted(
-            prediction.getId(),
+            UUID.randomUUID().toString(),
             prediction.getId(),
             prediction.getMatchId(),
             prediction.getUserId(),

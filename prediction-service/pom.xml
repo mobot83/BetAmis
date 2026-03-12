@@ -7,6 +7,7 @@
 
     <properties>
         <compiler-plugin.version>3.15.0</compiler-plugin.version>
+        <schema.registry.url>http://localhost:8081</schema.registry.url>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -67,6 +68,10 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-confluent-registry-avro</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit5</artifactId>
             <scope>test</scope>
         </dependency>
@@ -96,6 +101,50 @@
                             <goal>generate-code</goal>
                             <goal>generate-code-tests</goal>
                             <goal>native-image-agent</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Generate Java classes from Avro schemas at compile time -->
+            <plugin>
+                <groupId>org.apache.avro</groupId>
+                <artifactId>avro-maven-plugin</artifactId>
+                <version>1.11.3</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>schema</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>${project.basedir}/../schemas/avro</sourceDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources/avro</outputDirectory>
+                            <stringType>String</stringType>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Verify schema backward-compatibility against the registry before merge -->
+            <plugin>
+                <groupId>io.confluent</groupId>
+                <artifactId>kafka-schema-registry-maven-plugin</artifactId>
+                <version>7.6.1</version>
+                <configuration>
+                    <schemaRegistryUrls>
+                        <param>${schema.registry.url}</param>
+                    </schemaRegistryUrls>
+                    <subjects>
+                        <prediction.submitted-value>${project.basedir}/../schemas/avro/prediction/PredictionSubmitted.avsc</prediction.submitted-value>
+                        <prediction.closed-value>${project.basedir}/../schemas/avro/prediction/PredictionClosed.avsc</prediction.closed-value>
+                        <match.finished-value>${project.basedir}/../schemas/avro/match/MatchFinished.avsc</match.finished-value>
+                    </subjects>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>check-compatibility</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>test-compatibility</goal>
                         </goals>
                     </execution>
                 </executions>
