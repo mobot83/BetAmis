@@ -24,7 +24,6 @@ public class SubmitPredictionUseCase implements SubmitPrediction {
         }
         var prediction = Prediction.submit(matchId, userId, score, kickOffTime);
         predictionRepository.save(prediction);
-        // Right now events are not published but should be later on
         prediction.pullDomainEvents();
     }
 }

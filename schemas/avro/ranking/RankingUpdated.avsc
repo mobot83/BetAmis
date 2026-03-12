@@ -1,0 +1,36 @@
+{
+  "type": "record",
+  "name": "RankingUpdated",
+  "namespace": "com.betamis.ranking.event",
+  "doc": "Emitted by scoring-service when a user's position in a league ranking changes.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string",
+      "doc": "Unique event identifier (UUID)."
+    },
+    {
+      "name": "userId",
+      "type": "string"
+    },
+    {
+      "name": "leagueId",
+      "type": "string"
+    },
+    {
+      "name": "totalPoints",
+      "type": "long",
+      "doc": "Cumulative points for this user in the league at the time of the event."
+    },
+    {
+      "name": "rank",
+      "type": "int",
+      "doc": "Current rank of the user in the league (1-based)."
+    },
+    {
+      "name": "occurredAt",
+      "type": { "type": "long", "logicalType": "timestamp-millis" },
+      "doc": "Wall-clock time at which the event was produced."
+    }
+  ]
+}
