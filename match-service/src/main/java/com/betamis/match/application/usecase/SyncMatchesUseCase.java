@@ -62,9 +62,10 @@ public class SyncMatchesUseCase implements SyncMatches {
         existing.ifPresent(prev -> {
             if (prev.getStatus() == newStatus) return;
             if (newStatus == MatchStatus.STARTED) {
-                eventPublisher.publish(MatchStarted.of(match.getId()));
+                eventPublisher.publish(MatchStarted.of(match.getId(), match.getHomeTeamId(), match.getAwayTeamId()));
             } else if (newStatus == MatchStatus.FINISHED) {
-                eventPublisher.publish(MatchFinished.of(match.getId()));
+                eventPublisher.publish(MatchFinished.of(match.getId(), match.getHomeTeamId(), match.getAwayTeamId(),
+                        match.getHomeTeamScore(), match.getAwayTeamScore()));
             }
         });
     }

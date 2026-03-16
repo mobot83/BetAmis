@@ -1,0 +1,33 @@
+{
+  "type": "record",
+  "name": "MatchStarted",
+  "namespace": "com.betamis.match.event",
+  "doc": "Emitted by match-service when a match transitions to in-play status.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string",
+      "doc": "Unique event identifier (UUID)."
+    },
+    {
+      "name": "matchId",
+      "type": "string",
+      "doc": "Identifier of the started match."
+    },
+    {
+      "name": "homeTeamId",
+      "type": "string",
+      "doc": "Identifier of the home team."
+    },
+    {
+      "name": "awayTeamId",
+      "type": "string",
+      "doc": "Identifier of the away team."
+    },
+    {
+      "name": "occurredAt",
+      "type": { "type": "long", "logicalType": "timestamp-millis" },
+      "doc": "Wall-clock time at which the event was produced."
+    }
+  ]
+}

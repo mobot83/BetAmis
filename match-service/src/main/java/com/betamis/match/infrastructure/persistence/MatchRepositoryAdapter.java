@@ -26,7 +26,7 @@ public class MatchRepositoryAdapter implements MatchRepository {
         entity.awayTeamScore = match.getAwayTeamScore();
         entity.status = match.getStatus();
 
-        entity.persistAndFlush();
+        entity.persist();
     }
 
     @Override

@@ -4,7 +4,6 @@ import com.betamis.match.domain.model.match.Match;
 import com.betamis.match.domain.model.match.MatchStatus;
 import com.betamis.match.domain.port.out.MatchRepository;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
