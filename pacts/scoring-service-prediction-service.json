@@ -1,0 +1,95 @@
+{
+  "consumer": {
+    "name": "scoring-service"
+  },
+  "provider": {
+    "name": "prediction-service"
+  },
+  "messages": [
+    {
+      "description": "a prediction submitted event",
+      "metaData": {
+        "contentType": "application/json"
+      },
+      "contents": {
+        "id": "event-uuid-1",
+        "predictionId": "pred-uuid-1",
+        "matchId": "match-uuid-1",
+        "userId": "user-uuid-1",
+        "score": {
+          "homeTeamScore": 2,
+          "awayTeamScore": 1
+        },
+        "occurredAt": 1710000000000
+      },
+      "matchingRules": {
+        "body": {
+          "$.id": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ],
+            "combine": "AND"
+          },
+          "$.predictionId": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ],
+            "combine": "AND"
+          },
+          "$.matchId": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ],
+            "combine": "AND"
+          },
+          "$.userId": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ],
+            "combine": "AND"
+          },
+          "$.score.homeTeamScore": {
+            "matchers": [
+              {
+                "match": "integer"
+              }
+            ],
+            "combine": "AND"
+          },
+          "$.score.awayTeamScore": {
+            "matchers": [
+              {
+                "match": "integer"
+              }
+            ],
+            "combine": "AND"
+          },
+          "$.occurredAt": {
+            "matchers": [
+              {
+                "match": "integer"
+              }
+            ],
+            "combine": "AND"
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    },
+    "pact-jvm": {
+      "version": "4.6.16"
+    }
+  }
+}
