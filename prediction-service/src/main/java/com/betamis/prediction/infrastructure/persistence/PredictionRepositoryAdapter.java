@@ -8,6 +8,8 @@ import com.betamis.prediction.infrastructure.persistence.entity.PredictionEntity
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
+import java.util.List;
+
 @ApplicationScoped
 public class PredictionRepositoryAdapter implements PredictionRepository {
 
@@ -32,6 +34,23 @@ public class PredictionRepositoryAdapter implements PredictionRepository {
                 .firstResultOptional()
                 .map(this::toDomain)
                 .orElse(null);
+    }
+
+    @Override
+    @Transactional
+    public List<Prediction> findByMatchId(String matchId) {
+        return PredictionEntity.<PredictionEntity>find("matchId", matchId)
+                .stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public void update(Prediction prediction) {
+        PredictionEntity.<PredictionEntity>find("predictionId", prediction.getId())
+                .firstResultOptional()
+                .ifPresent(entity -> entity.status = prediction.getStatus().name());
     }
 
     @Override
