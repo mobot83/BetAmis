@@ -1,5 +1,6 @@
 package com.betamis.prediction.application.usecase;
 
+import com.betamis.prediction.domain.event.PredictionClosed;
 import com.betamis.prediction.domain.exception.PredictionAlreadyClosedException;
 import com.betamis.prediction.domain.model.prediction.Prediction;
 import com.betamis.prediction.domain.model.prediction.PredictionStatus;
@@ -47,7 +48,7 @@ class ClosePredictionUseCaseTest {
         assertEquals(PredictionStatus.CLOSED, p2.getStatus());
         verify(repository).update(p1);
         verify(repository).update(p2);
-        verify(eventPublisher).publish(argThat(e -> "match-1".equals(e.matchId())));
+        verify(eventPublisher).publish(argThat((PredictionClosed e) -> "match-1".equals(e.matchId())));
     }
 
     @Test
@@ -60,7 +61,7 @@ class ClosePredictionUseCaseTest {
 
         verify(repository).update(open);
         verify(repository, never()).update(closed);
-        verify(eventPublisher).publish(any());
+        verify(eventPublisher).publish(any(PredictionClosed.class));
     }
 
     @Test
@@ -70,7 +71,7 @@ class ClosePredictionUseCaseTest {
         useCase.close("match-empty");
 
         verify(repository, never()).update(any());
-        verify(eventPublisher).publish(argThat(e -> "match-empty".equals(e.matchId())));
+        verify(eventPublisher).publish(argThat((PredictionClosed e) -> "match-empty".equals(e.matchId())));
     }
 
     private Prediction submittedPrediction(String id, String matchId, String userId) {

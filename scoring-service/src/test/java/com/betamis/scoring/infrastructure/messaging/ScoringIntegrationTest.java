@@ -9,6 +9,7 @@ import com.betamis.scoring.domain.model.FinalScore;
 import com.betamis.scoring.domain.model.ScoringResult;
 import com.betamis.scoring.domain.model.StoredPrediction;
 import com.betamis.scoring.domain.model.UserRanking;
+import com.betamis.scoring.domain.port.out.LeagueMembershipRepository;
 import com.betamis.scoring.domain.port.out.RankingRepository;
 import com.betamis.scoring.domain.port.out.ScoringEventPublisher;
 import com.betamis.scoring.domain.port.out.ScoringResultRepository;
@@ -39,6 +40,7 @@ class ScoringIntegrationTest {
     @Mock ScoringResultRepository scoringResultRepository;
     @Mock RankingRepository rankingRepository;
     @Mock ScoringEventPublisher eventPublisher;
+    @Mock LeagueMembershipRepository leagueMembershipRepository;
 
     KafkaPredictionConsumer predictionConsumer;
     KafkaMatchFinishedConsumer matchConsumer;
@@ -46,7 +48,7 @@ class ScoringIntegrationTest {
     @BeforeEach
     void setUp() {
         StorePredictionUseCase storePrediction = new StorePredictionUseCase(predictionRepository);
-        ScoreMatchUseCase scoreMatch = new ScoreMatchUseCase(predictionRepository, scoringResultRepository, rankingRepository, eventPublisher);
+        ScoreMatchUseCase scoreMatch = new ScoreMatchUseCase(predictionRepository, scoringResultRepository, rankingRepository, eventPublisher, leagueMembershipRepository);
         predictionConsumer = new KafkaPredictionConsumer(storePrediction);
         matchConsumer = new KafkaMatchFinishedConsumer(scoreMatch);
     }

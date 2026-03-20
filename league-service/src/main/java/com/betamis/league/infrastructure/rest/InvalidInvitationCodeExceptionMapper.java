@@ -10,7 +10,7 @@ public class InvalidInvitationCodeExceptionMapper implements ExceptionMapper<Inv
 
     @Override
     public Response toResponse(InvalidInvitationCodeException exception) {
-        return Response.status(Response.Status.UNPROCESSABLE_ENTITY)
+        return Response.status(422)
                 .entity(new LeagueResource.ErrorResponse(exception.getMessage()))
                 .build();
     }

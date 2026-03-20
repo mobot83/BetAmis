@@ -1,0 +1,145 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-realm
+  namespace: betamis-infra
+data:
+  betamis-realm.json: |
+    {
+      "realm": "betamis",
+      "enabled": true,
+      "registrationAllowed": false,
+      "resetPasswordAllowed": false,
+      "rememberMe": false,
+      "verifyEmail": false,
+      "loginWithEmailAllowed": true,
+      "duplicateEmailsAllowed": false,
+      "sslRequired": "none",
+      "defaultSignatureAlgorithm": "RS256",
+      "roles": {
+        "realm": [
+          {
+            "name": "betamis-user",
+            "description": "Standard BetAmis application user",
+            "composite": false
+          },
+          {
+            "name": "betamis-admin",
+            "description": "BetAmis administrator — access to internal admin operations",
+            "composite": false
+          }
+        ]
+      },
+      "clients": [
+        {
+          "clientId": "betamis-frontend",
+          "name": "BetAmis Frontend",
+          "enabled": true,
+          "publicClient": true,
+          "standardFlowEnabled": true,
+          "directAccessGrantsEnabled": true,
+          "redirectUris": [
+            "http://localhost:*",
+            "http://127.0.0.1:*"
+          ],
+          "webOrigins": [
+            "http://localhost:*"
+          ]
+        }
+      ],
+      "users": [
+        {
+          "username": "testuser",
+          "enabled": true,
+          "email": "testuser@betamis.com",
+          "firstName": "Test",
+          "lastName": "User",
+          "credentials": [
+            {
+              "type": "password",
+              "value": "testpassword",
+              "temporary": false
+            }
+          ],
+          "realmRoles": ["betamis-user"]
+        },
+        {
+          "username": "admin",
+          "enabled": true,
+          "email": "admin@betamis.com",
+          "firstName": "Admin",
+          "lastName": "User",
+          "credentials": [
+            {
+              "type": "password",
+              "value": "adminpassword",
+              "temporary": false
+            }
+          ],
+          "realmRoles": ["betamis-admin", "betamis-user"]
+        }
+      ]
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: betamis-infra
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:24.0
+          args: ["start-dev", "--import-realm"]
+          ports:
+            - containerPort: 8080
+          env:
+            - name: KEYCLOAK_ADMIN
+              value: admin
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: admin
+          volumeMounts:
+            - name: realm-config
+              mountPath: /opt/keycloak/data/import
+          readinessProbe:
+            httpGet:
+              path: /realms/betamis
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 12
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "200m"
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"
+      volumes:
+        - name: realm-config
+          configMap:
+            name: keycloak-realm
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: betamis-infra
+spec:
+  selector:
+    app: keycloak
+  ports:
+    - port: 8080
+      targetPort: 8080
+  type: ClusterIP
