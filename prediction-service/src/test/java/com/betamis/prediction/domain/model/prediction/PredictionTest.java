@@ -2,6 +2,7 @@ package com.betamis.prediction.domain.model.prediction;
 
 import com.betamis.prediction.domain.event.PredictionSubmitted;
 import com.betamis.prediction.domain.exception.KickOffAlreadyPassedException;
+import com.betamis.prediction.domain.exception.PredictionAlreadyClosedException;
 import com.betamis.prediction.domain.model.score.Score;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -136,6 +137,24 @@ class PredictionTest {
         prediction.pullDomainEvents();
 
         assertTrue(prediction.pullDomainEvents().isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should transition status to CLOSED when close() is called")
+    void shouldTransitionToClosedOnClose() {
+        var prediction = new Prediction("p-1", "m-1", "u-1", new Score(1, 0), PredictionStatus.SUBMITTED, Instant.now());
+
+        prediction.close();
+
+        assertEquals(PredictionStatus.CLOSED, prediction.getStatus());
+    }
+
+    @Test
+    @DisplayName("Should throw PredictionAlreadyClosedException when closing an already-closed prediction")
+    void shouldThrowWhenClosingAlreadyClosedPrediction() {
+        var prediction = new Prediction("p-2", "m-1", "u-1", new Score(0, 0), PredictionStatus.CLOSED, Instant.now());
+
+        assertThrows(PredictionAlreadyClosedException.class, prediction::close);
     }
 
 }

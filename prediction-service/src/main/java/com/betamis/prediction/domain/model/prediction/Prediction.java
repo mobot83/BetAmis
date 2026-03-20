@@ -2,6 +2,7 @@ package com.betamis.prediction.domain.model.prediction;
 
 import com.betamis.prediction.domain.event.PredictionSubmitted;
 import com.betamis.prediction.domain.exception.KickOffAlreadyPassedException;
+import com.betamis.prediction.domain.exception.PredictionAlreadyClosedException;
 import com.betamis.prediction.domain.model.score.Score;
 
 import java.time.Instant;
@@ -84,6 +85,14 @@ public class Prediction {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
+    }
+
+    public void close() {
+        if (this.status == PredictionStatus.CLOSED) {
+            throw new PredictionAlreadyClosedException(
+                    "Prediction %s is already closed".formatted(id));
+        }
+        this.status = PredictionStatus.CLOSED;
     }
 
     public List<Object> pullDomainEvents() {
