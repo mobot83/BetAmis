@@ -26,5 +26,5 @@ CREATE TABLE invitations (
     expires_at          TIMESTAMPTZ     NOT NULL
 );
 
-CREATE INDEX idx_invitations_code ON invitations (code);
+ALTER TABLE invitations ADD CONSTRAINT uq_invitations_code UNIQUE (league_entity_id, code);
 

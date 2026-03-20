@@ -89,7 +89,7 @@ public class League {
                 .findFirst()
                 .orElseThrow(() -> new InvalidInvitationCodeException(code));
 
-        memberships.add(new Membership(userId, Instant.now()));
+        memberships.add(new Membership(userId, now));
         domainEvents.add(MemberJoined.of(id, userId));
     }
 

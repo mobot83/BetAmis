@@ -45,8 +45,9 @@ class CreateLeagueUseCaseTest {
     @Test
     @DisplayName("create() should not publish events twice if called again")
     void shouldClearDomainEventsAfterPublishing() {
-        useCase.create("Champions 2026", "user-42");
-        // Events are consumed during create(); calling pollDomainEvents afterwards returns empty
+        League league = useCase.create("Champions 2026", "user-42");
+        // Events are consumed during create(); pollDomainEvents() must return empty afterwards
+        assertTrue(league.pollDomainEvents().isEmpty());
         verify(publisher, times(1)).publish(any(LeagueCreated.class));
     }
 }
