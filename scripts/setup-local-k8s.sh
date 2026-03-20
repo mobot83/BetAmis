@@ -107,39 +107,13 @@ build_and_load() {
 
 # ── Apply manifests ────────────────────────────────────────────────────────────
 apply_manifests() {
-  info "Creating namespaces..."
-  kubectl apply -f "$ROOT_DIR/k8s/namespace.yaml"
+  if ! command -v helmfile &>/dev/null; then
+    error "helmfile not found. Install it: https://github.com/helmfile/helmfile/releases"
+  fi
 
-  info "Deploying infrastructure (postgres, zookeeper, kafka, schema-registry, redis, keycloak)..."
-  kubectl apply -f "$ROOT_DIR/k8s/infra/postgres.yaml"
-  kubectl apply -f "$ROOT_DIR/k8s/infra/zookeeper.yaml"
-  kubectl apply -f "$ROOT_DIR/k8s/infra/kafka.yaml"
-  kubectl apply -f "$ROOT_DIR/k8s/infra/schema-registry.yaml"
-  kubectl apply -f "$ROOT_DIR/k8s/infra/redis.yaml"
-  kubectl apply -f "$ROOT_DIR/k8s/infra/keycloak.yaml"
-
-  info "Waiting for infrastructure to be ready (up to 3 minutes)..."
-  kubectl rollout status deployment/postgres        -n betamis-infra --timeout=180s
-  kubectl rollout status deployment/zookeeper       -n betamis-infra --timeout=180s
-  kubectl rollout status deployment/kafka           -n betamis-infra --timeout=180s
-  kubectl rollout status deployment/schema-registry -n betamis-infra --timeout=180s
-  kubectl rollout status deployment/redis           -n betamis-infra --timeout=180s
-  kubectl rollout status deployment/keycloak        -n betamis-infra --timeout=180s
-  success "Infrastructure ready."
-
-  info "Deploying application services..."
-  kubectl apply -f "$ROOT_DIR/k8s/services/secret.yaml"
-  kubectl apply -f "$ROOT_DIR/k8s/services/league-service.yaml"
-  kubectl apply -f "$ROOT_DIR/k8s/services/prediction-service.yaml"
-  kubectl apply -f "$ROOT_DIR/k8s/services/scoring-service.yaml"
-  kubectl apply -f "$ROOT_DIR/k8s/services/match-service.yaml"
-
-  info "Waiting for application services to be ready (up to 3 minutes)..."
-  kubectl rollout status deployment/league-service     -n betamis-dev --timeout=180s
-  kubectl rollout status deployment/prediction-service -n betamis-dev --timeout=180s
-  kubectl rollout status deployment/scoring-service    -n betamis-dev --timeout=180s
-  kubectl rollout status deployment/match-service      -n betamis-dev --timeout=180s
-  success "All services ready."
+  info "Deploying full environment via helmfile..."
+  helmfile sync -e dev
+  success "All releases deployed."
 }
 
 # ── Port-forward instructions ──────────────────────────────────────────────────

@@ -1,0 +1,13 @@
+config:
+  DB_HOST: postgres.betamis-infra.svc.cluster.local
+  KAFKA_BOOTSTRAP_SERVERS: kafka.betamis-infra.svc.cluster.local:9092
+  KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry.betamis-infra.svc.cluster.local:8081
+  JWT_PUBLIC_KEY_LOCATION: http://keycloak.betamis-infra.svc.cluster.local:8080/realms/betamis/protocol/openid-connect/certs
+  JWT_ISSUER: http://keycloak.betamis-infra.svc.cluster.local:8080/realms/betamis
+
+secret:
+  create: true
+  data:
+    DB_USERNAME: betamis
+    DB_PASSWORD: betamis_secret
+    FOOTBALL_DATA_API_TOKEN: "replace-me"

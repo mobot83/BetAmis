@@ -1,0 +1,12 @@
+config:
+  DB_HOST: postgres.betamis-infra.svc.cluster.local
+  KAFKA_BOOTSTRAP_SERVERS: kafka.betamis-infra.svc.cluster.local:9092
+  KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry.betamis-infra.svc.cluster.local:8081
+  REDIS_HOST: redis.betamis-infra.svc.cluster.local
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.betamis-infra.svc.cluster.local:4317
+
+secret:
+  create: true
+  data:
+    DB_USERNAME: betamis
+    DB_PASSWORD: betamis_secret

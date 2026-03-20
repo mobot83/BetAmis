@@ -1,0 +1,36 @@
+image:
+  repository: betamis/scoring-service
+  tag: dev
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+service:
+  port: 8080
+
+healthPath: /q/health/ready
+
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+config:
+  DB_HOST: ""
+  DB_PORT: "5432"
+  DB_NAME: scoring_db
+  KAFKA_BOOTSTRAP_SERVERS: ""
+  KAFKA_SCHEMA_REGISTRY_URL: ""
+  REDIS_HOST: ""
+  REDIS_PORT: "6379"
+  OTEL_EXPORTER_OTLP_ENDPOINT: ""
+
+secret:
+  create: true
+  existingSecret: ""
+  data:
+    DB_USERNAME: betamis
+    DB_PASSWORD: ""

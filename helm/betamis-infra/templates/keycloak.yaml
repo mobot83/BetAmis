@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-realm
+  namespace: {{ .Release.Namespace }}
+data:
+  betamis-realm.json: |
+    {{ .Files.Get "files/betamis-realm.json" | nindent 4 }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "betamis-infra.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+        - name: keycloak
+          image: {{ .Values.keycloak.image }}
+          args: ["start-dev", "--import-realm"]
+          ports:
+            - containerPort: 8080
+          env:
+            - name: KEYCLOAK_ADMIN
+              value: {{ .Values.keycloak.admin.username | quote }}
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: {{ .Values.keycloak.admin.password | quote }}
+          volumeMounts:
+            - name: realm-config
+              mountPath: /opt/keycloak/data/import
+          readinessProbe:
+            httpGet:
+              path: /realms/betamis
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 12
+          resources:
+            {{- toYaml .Values.keycloak.resources | nindent 12 }}
+      volumes:
+        - name: realm-config
+          configMap:
+            name: keycloak-realm
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: keycloak
+  ports:
+    - port: 8080
+      targetPort: 8080
+  type: ClusterIP
