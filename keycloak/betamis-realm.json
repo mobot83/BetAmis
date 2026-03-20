@@ -1,0 +1,75 @@
+{
+  "realm": "betamis",
+  "enabled": true,
+  "registrationAllowed": false,
+  "resetPasswordAllowed": false,
+  "rememberMe": false,
+  "verifyEmail": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "sslRequired": "none",
+  "defaultSignatureAlgorithm": "RS256",
+  "roles": {
+    "realm": [
+      {
+        "name": "betamis-user",
+        "description": "Standard BetAmis application user",
+        "composite": false
+      },
+      {
+        "name": "betamis-admin",
+        "description": "BetAmis administrator — access to internal admin operations",
+        "composite": false
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "betamis-frontend",
+      "name": "BetAmis Frontend",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": [
+        "http://localhost:*",
+        "http://127.0.0.1:*"
+      ],
+      "webOrigins": [
+        "http://localhost:*"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "testuser",
+      "enabled": true,
+      "email": "testuser@betamis.com",
+      "firstName": "Test",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "testpassword",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["betamis-user"]
+    },
+    {
+      "username": "admin",
+      "enabled": true,
+      "email": "admin@betamis.com",
+      "firstName": "Admin",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "adminpassword",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["betamis-admin", "betamis-user"]
+    }
+  ]
+}

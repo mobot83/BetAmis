@@ -127,6 +127,30 @@ services:
       retries: 5
 
   # ──────────────────────────────────────────
+  # Keycloak — identity provider partagé
+  # ──────────────────────────────────────────
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: betamis-keycloak
+    restart: unless-stopped
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8180:8080"
+    volumes:
+      - ./keycloak/betamis-realm.json:/opt/keycloak/data/import/betamis-realm.json:ro
+    networks:
+      - betamis-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/realms/betamis"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  # ──────────────────────────────────────────
   # Mailhog — serveur SMTP de développement
   # ──────────────────────────────────────────
   mailhog:

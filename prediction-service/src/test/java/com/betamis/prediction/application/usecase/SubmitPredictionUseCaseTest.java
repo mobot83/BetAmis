@@ -4,6 +4,7 @@ import com.betamis.prediction.domain.exception.PredictionAlreadySubmittedExcepti
 import com.betamis.prediction.domain.model.prediction.Prediction;
 import com.betamis.prediction.domain.model.prediction.PredictionStatus;
 import com.betamis.prediction.domain.model.score.Score;
+import com.betamis.prediction.domain.port.out.EventPublisher;
 import com.betamis.prediction.domain.port.out.PredictionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,13 +26,16 @@ class SubmitPredictionUseCaseTest {
     @Mock
     PredictionRepository repository;
 
+    @Mock
+    EventPublisher eventPublisher;
+
     SubmitPredictionUseCase useCase;
 
     static final Instant FUTURE_KICK_OFF = Instant.now().plus(1, ChronoUnit.HOURS);
 
     @BeforeEach
     void setUp() {
-        useCase = new SubmitPredictionUseCase(repository);
+        useCase = new SubmitPredictionUseCase(repository, eventPublisher);
     }
 
     @Test
@@ -40,8 +44,11 @@ class SubmitPredictionUseCaseTest {
         when(repository.existsByUserIdAndMatchId("user1", "match1")).thenReturn(false);
         var captor = ArgumentCaptor.forClass(Prediction.class);
 
-        useCase.execute("match1", "user1", new Score(2, 1), FUTURE_KICK_OFF);
+        String predictionId = useCase.execute("match1", "user1", new Score(2, 1), FUTURE_KICK_OFF);
 
+        assertNotNull(predictionId);
+        assertFalse(predictionId.isBlank());
+        verify(eventPublisher).publish(any());
         verify(repository).save(captor.capture());
         var prediction = captor.getValue();
         assertEquals(PredictionStatus.SUBMITTED, prediction.getStatus());
