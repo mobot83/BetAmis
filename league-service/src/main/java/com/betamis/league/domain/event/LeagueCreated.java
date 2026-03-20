@@ -11,14 +11,15 @@ public record LeagueCreated(
         String invitationCode,
         Instant occurredAt) {
 
-    public static LeagueCreated of(String leagueId, String leagueName, String ownerId, String invitationCode) {
+    public static LeagueCreated of(String leagueId, String leagueName, String ownerId,
+                                   String invitationCode, Instant occurredAt) {
         return new LeagueCreated(
                 UUID.randomUUID().toString(),
                 leagueId,
                 leagueName,
                 ownerId,
                 invitationCode,
-                Instant.now()
+                occurredAt
         );
     }
 }

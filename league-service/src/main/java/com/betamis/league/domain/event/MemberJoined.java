@@ -9,12 +9,12 @@ public record MemberJoined(
         String userId,
         Instant occurredAt) {
 
-    public static MemberJoined of(String leagueId, String userId) {
+    public static MemberJoined of(String leagueId, String userId, Instant occurredAt) {
         return new MemberJoined(
                 UUID.randomUUID().toString(),
                 leagueId,
                 userId,
-                Instant.now()
+                occurredAt
         );
     }
 }

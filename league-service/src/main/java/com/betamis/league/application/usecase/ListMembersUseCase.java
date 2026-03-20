@@ -5,6 +5,7 @@ import com.betamis.league.domain.model.Membership;
 import com.betamis.league.domain.port.in.ListMembers;
 import com.betamis.league.domain.port.out.LeagueRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import java.util.List;
 
@@ -13,15 +14,15 @@ public class ListMembersUseCase implements ListMembers {
 
     private final LeagueRepository leagueRepository;
 
+    @Inject
     public ListMembersUseCase(LeagueRepository leagueRepository) {
         this.leagueRepository = leagueRepository;
     }
 
     @Override
     public List<Membership> list(String leagueId) {
-        return leagueRepository.findById(leagueId)
-                .orElseThrow(() -> new LeagueNotFoundException(leagueId))
-                .getMemberships();
+        return leagueRepository.findMembersByLeagueId(leagueId)
+                .orElseThrow(() -> new LeagueNotFoundException(leagueId));
     }
 }
 

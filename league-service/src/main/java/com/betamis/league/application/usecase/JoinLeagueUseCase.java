@@ -7,7 +7,10 @@ import com.betamis.league.domain.port.in.JoinLeague;
 import com.betamis.league.domain.port.out.LeagueEventPublisher;
 import com.betamis.league.domain.port.out.LeagueRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+
+import java.time.Instant;
 
 @ApplicationScoped
 public class JoinLeagueUseCase implements JoinLeague {
@@ -15,6 +18,7 @@ public class JoinLeagueUseCase implements JoinLeague {
     private final LeagueRepository leagueRepository;
     private final LeagueEventPublisher eventPublisher;
 
+    @Inject
     public JoinLeagueUseCase(LeagueRepository leagueRepository,
                              LeagueEventPublisher eventPublisher) {
         this.leagueRepository = leagueRepository;
@@ -27,7 +31,8 @@ public class JoinLeagueUseCase implements JoinLeague {
         League league = leagueRepository.findById(leagueId)
                 .orElseThrow(() -> new LeagueNotFoundException(leagueId));
 
-        league.join(userId, invitationCode);
+        Instant now = Instant.now();
+        league.join(userId, invitationCode, now);
         leagueRepository.save(league);
 
         league.pollDomainEvents().forEach(event -> {
