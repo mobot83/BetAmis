@@ -9,6 +9,7 @@
 
     <properties>
         <compiler-plugin.version>3.15.0</compiler-plugin.version>
+        <pact.version>4.6.16</pact.version>
         <schema.registry.url>http://localhost:8081</schema.registry.url>
         <schema.registry.skip>true</schema.registry.skip>
         <maven.compiler.release>21</maven.compiler.release>
@@ -129,6 +130,12 @@
             <artifactId>rest-assured</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>au.com.dius.pact.provider</groupId>
+            <artifactId>junit5</artifactId>
+            <version>${pact.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <repositories>
@@ -225,6 +232,7 @@
                     <systemPropertyVariables>
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                         <maven.home>${maven.home}</maven.home>
+                        <pact.rootDir>../pacts</pact.rootDir>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
