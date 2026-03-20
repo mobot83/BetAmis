@@ -1,0 +1,14 @@
+# Production overrides.
+# Sensitive values must NOT be committed here.
+# Supply them at deploy time:
+#   helmfile sync -e prod \
+#     --set postgres.auth.password=$POSTGRES_PASSWORD \
+#     --set keycloak.admin.password=$KEYCLOAK_ADMIN_PASSWORD
+
+postgres:
+  auth:
+    password: ""   # required — pass via --set or sealed-secrets
+
+keycloak:
+  admin:
+    password: ""   # required — pass via --set or sealed-secrets

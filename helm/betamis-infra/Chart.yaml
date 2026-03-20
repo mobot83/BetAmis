@@ -1,0 +1,5 @@
+apiVersion: v2
+name: betamis-infra
+description: BetAmis infrastructure — Postgres, Kafka, Schema Registry, Redis, Keycloak
+type: application
+version: 0.1.0

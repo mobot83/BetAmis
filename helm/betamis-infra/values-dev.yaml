@@ -1,0 +1,6 @@
+postgres:
+  auth:
+    password: betamis_secret
+
+kafka:
+  advertisedHost: kafka.betamis-infra.svc.cluster.local

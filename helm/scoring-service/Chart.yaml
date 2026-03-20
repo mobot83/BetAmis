@@ -1,0 +1,6 @@
+apiVersion: v2
+name: scoring-service
+description: BetAmis scoring and ranking service
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

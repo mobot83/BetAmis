@@ -1,0 +1,58 @@
+environments:
+  dev:
+    values:
+      - environment: dev
+  prod:
+    values:
+      - environment: prod
+
+---
+
+releases:
+
+  # ── Infrastructure ──────────────────────────────────────────────────────────
+  - name: betamis-infra
+    namespace: betamis-infra
+    createNamespace: true
+    chart: ./helm/betamis-infra
+    values:
+      - ./helm/betamis-infra/values.yaml
+      - ./helm/betamis-infra/values-{{ .Environment.Name }}.yaml
+
+  # ── Application services ────────────────────────────────────────────────────
+  - name: league-service
+    namespace: betamis-dev
+    createNamespace: true
+    chart: ./helm/league-service
+    needs:
+      - betamis-infra/betamis-infra
+    values:
+      - ./helm/league-service/values.yaml
+      - ./helm/league-service/values-{{ .Environment.Name }}.yaml
+
+  - name: prediction-service
+    namespace: betamis-dev
+    chart: ./helm/prediction-service
+    needs:
+      - betamis-infra/betamis-infra
+    values:
+      - ./helm/prediction-service/values.yaml
+      - ./helm/prediction-service/values-{{ .Environment.Name }}.yaml
+
+  - name: match-service
+    namespace: betamis-dev
+    chart: ./helm/match-service
+    needs:
+      - betamis-infra/betamis-infra
+    values:
+      - ./helm/match-service/values.yaml
+      - ./helm/match-service/values-{{ .Environment.Name }}.yaml
+
+  - name: scoring-service
+    namespace: betamis-dev
+    chart: ./helm/scoring-service
+    needs:
+      - betamis-infra/betamis-infra
+    values:
+      - ./helm/scoring-service/values.yaml
+      - ./helm/scoring-service/values-{{ .Environment.Name }}.yaml

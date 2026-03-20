@@ -1,0 +1,38 @@
+name: Helm Lint
+
+on:
+  push:
+    paths:
+      - 'helm/**'
+      - 'helmfile.yaml'
+  pull_request:
+    paths:
+      - 'helm/**'
+      - 'helmfile.yaml'
+
+jobs:
+  lint:
+    name: helm lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.17.0
+
+      - name: Lint betamis-infra
+        run: helm lint helm/betamis-infra --values helm/betamis-infra/values-dev.yaml
+
+      - name: Lint league-service
+        run: helm lint helm/league-service --values helm/league-service/values-dev.yaml
+
+      - name: Lint prediction-service
+        run: helm lint helm/prediction-service --values helm/prediction-service/values-dev.yaml
+
+      - name: Lint match-service
+        run: helm lint helm/match-service --values helm/match-service/values-dev.yaml
+
+      - name: Lint scoring-service
+        run: helm lint helm/scoring-service --values helm/scoring-service/values-dev.yaml
