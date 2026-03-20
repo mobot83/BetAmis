@@ -1,5 +1,6 @@
 package com.betamis.prediction.application.usecase;
 
+import com.betamis.prediction.domain.event.PredictionSubmitted;
 import com.betamis.prediction.domain.exception.PredictionAlreadySubmittedException;
 import com.betamis.prediction.domain.model.prediction.Prediction;
 import com.betamis.prediction.domain.model.prediction.PredictionStatus;
@@ -48,7 +49,7 @@ class SubmitPredictionUseCaseTest {
 
         assertNotNull(predictionId);
         assertFalse(predictionId.isBlank());
-        verify(eventPublisher).publish(any());
+        verify(eventPublisher).publish(any(PredictionSubmitted.class));
         verify(repository).save(captor.capture());
         var prediction = captor.getValue();
         assertEquals(PredictionStatus.SUBMITTED, prediction.getStatus());

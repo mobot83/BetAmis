@@ -4,6 +4,7 @@ import com.betamis.scoring.domain.model.FinalScore;
 import com.betamis.scoring.domain.model.ScoringResult;
 import com.betamis.scoring.domain.model.StoredPrediction;
 import com.betamis.scoring.domain.model.UserRanking;
+import com.betamis.scoring.domain.port.out.LeagueMembershipRepository;
 import com.betamis.scoring.domain.port.out.RankingRepository;
 import com.betamis.scoring.domain.port.out.ScoringEventPublisher;
 import com.betamis.scoring.domain.port.out.ScoringResultRepository;
@@ -29,12 +30,13 @@ class ScoreMatchUseCaseMixedTest {
     @Mock ScoringResultRepository scoringResultRepository;
     @Mock RankingRepository rankingRepository;
     @Mock ScoringEventPublisher eventPublisher;
+    @Mock LeagueMembershipRepository leagueMembershipRepository;
 
     ScoreMatchUseCase useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new ScoreMatchUseCase(predictionRepository, scoringResultRepository, rankingRepository, eventPublisher);
+        useCase = new ScoreMatchUseCase(predictionRepository, scoringResultRepository, rankingRepository, eventPublisher, leagueMembershipRepository);
     }
 
     @Test

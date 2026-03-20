@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scoring-service-config
+  namespace: betamis-dev
+data:
+  DB_HOST: postgres.betamis-infra.svc.cluster.local
+  DB_PORT: "5432"
+  DB_NAME: scoring_db
+  KAFKA_BOOTSTRAP_SERVERS: kafka.betamis-infra.svc.cluster.local:9092
+  KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry.betamis-infra.svc.cluster.local:8081
+  REDIS_HOST: redis.betamis-infra.svc.cluster.local
+  REDIS_PORT: "6379"
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://localhost:4317
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scoring-service
+  namespace: betamis-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scoring-service
+  template:
+    metadata:
+      labels:
+        app: scoring-service
+    spec:
+      containers:
+        - name: scoring-service
+          image: betamis/scoring-service:dev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: scoring-service-config
+            - secretRef:
+                name: betamis-secrets
+          readinessProbe:
+            httpGet:
+              path: /q/health/ready
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scoring-service
+  namespace: betamis-dev
+spec:
+  selector:
+    app: scoring-service
+  ports:
+    - port: 8080
+      targetPort: 8080
+  type: ClusterIP
