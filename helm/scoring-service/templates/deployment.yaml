@@ -6,7 +6,9 @@ metadata:
   labels:
     {{- include "betamis.labels" . | nindent 4 }}
 spec:
+  {{- if not .Values.hpa.enabled }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       app: {{ .Chart.Name }}
@@ -26,11 +28,19 @@ spec:
                 name: {{ .Chart.Name }}-config
             - secretRef:
                 name: {{ if .Values.secret.existingSecret }}{{ .Values.secret.existingSecret }}{{ else }}{{ .Chart.Name }}-secret{{ end }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessPath }}
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
           readinessProbe:
             httpGet:
               path: {{ .Values.healthPath }}
               port: {{ .Values.service.port }}
             initialDelaySeconds: 30
             periodSeconds: 10
+            failureThreshold: 3
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

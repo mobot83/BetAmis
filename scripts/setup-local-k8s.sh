@@ -105,6 +105,22 @@ build_and_load() {
   done
 }
 
+# ── metrics-server (required for HPA) ─────────────────────────────────────────
+install_metrics_server() {
+  if kubectl get deployment metrics-server -n kube-system &>/dev/null; then
+    info "metrics-server already installed — skipping."
+    return
+  fi
+
+  info "Installing metrics-server (required for HPA)..."
+  kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+  # kind uses self-signed kubelet certs — patch to allow insecure TLS
+  kubectl patch deployment metrics-server -n kube-system \
+    --type=json \
+    -p='[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"}]'
+  success "metrics-server installed."
+}
+
 # ── Apply manifests ────────────────────────────────────────────────────────────
 apply_manifests() {
   if ! command -v helmfile &>/dev/null; then
@@ -152,6 +168,7 @@ print_access_info() {
 main() {
   check_prereqs
   create_cluster
+  install_metrics_server
   build_and_load
   apply_manifests
   print_access_info

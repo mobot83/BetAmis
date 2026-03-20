@@ -9,6 +9,14 @@ service:
   port: 8080
 
 healthPath: /q/health/ready
+livenessPath: /q/health/live
+
+hpa:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  scaleDownStabilizationSeconds: 60
 
 resources:
   requests:
