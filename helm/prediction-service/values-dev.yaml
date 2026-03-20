@@ -6,6 +6,16 @@ config:
   JWT_ISSUER: http://keycloak.betamis-infra.svc.cluster.local:8080/realms/betamis
   OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.betamis-infra.svc.cluster.local:4317
 
+# Lower CPU request in dev so HPA threshold (70% of 100m = 70m) is reachable
+# under k6 load. Prod keeps 250m (see values.yaml).
+resources:
+  requests:
+    memory: "384Mi"
+    cpu: "100m"
+  limits:
+    memory: "768Mi"
+    cpu: "1000m"
+
 secret:
   create: true
   data:

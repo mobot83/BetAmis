@@ -9,14 +9,22 @@ service:
   port: 8082
 
 healthPath: /q/health/ready
+livenessPath: /q/health/live
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  scaleDownStabilizationSeconds: 60
 
 resources:
   requests:
-    memory: "256Mi"
-    cpu: "100m"
+    memory: "384Mi"
+    cpu: "250m"
   limits:
-    memory: "512Mi"
-    cpu: "500m"
+    memory: "768Mi"
+    cpu: "1000m"
 
 config:
   DB_HOST: ""
