@@ -1,0 +1,39 @@
+{
+  "type": "record",
+  "name": "LeagueCreated",
+  "namespace": "com.betamis.league.event",
+  "doc": "Emitted by league-service when a new league is created.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string",
+      "doc": "Unique event identifier (UUID)."
+    },
+    {
+      "name": "leagueId",
+      "type": "string",
+      "doc": "Identifier of the created league."
+    },
+    {
+      "name": "leagueName",
+      "type": "string",
+      "doc": "Name of the created league."
+    },
+    {
+      "name": "ownerId",
+      "type": "string",
+      "doc": "User identifier of the league owner."
+    },
+    {
+      "name": "invitationCode",
+      "type": "string",
+      "doc": "Initial 6-character invitation code."
+    },
+    {
+      "name": "occurredAt",
+      "type": { "type": "long", "logicalType": "timestamp-millis" },
+      "doc": "Wall-clock time at which the event was produced."
+    }
+  ]
+}
+

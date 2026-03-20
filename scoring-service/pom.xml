@@ -180,6 +180,7 @@
                         <match.finished-value>${project.basedir}/../schemas/avro/match/MatchFinished.avsc</match.finished-value>
                         <points.calculated-value>${project.basedir}/../schemas/avro/scoring/PointsCalculated.avsc</points.calculated-value>
                         <ranking.updated-value>${project.basedir}/../schemas/avro/ranking/RankingUpdated.avsc</ranking.updated-value>
+                        <league.member-joined-value>${project.basedir}/../schemas/avro/league/MemberJoined.avsc</league.member-joined-value>
                     </subjects>
                 </configuration>
                 <executions>

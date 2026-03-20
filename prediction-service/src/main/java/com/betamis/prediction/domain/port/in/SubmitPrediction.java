@@ -5,5 +5,5 @@ import com.betamis.prediction.domain.model.score.Score;
 import java.time.Instant;
 
 public interface SubmitPrediction {
-    void execute(String matchId, String userId, Score score, Instant kickOffTime);
+    String execute(String matchId, String userId, Score score, Instant kickOffTime);
 }

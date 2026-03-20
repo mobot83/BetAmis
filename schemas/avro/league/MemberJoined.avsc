@@ -1,0 +1,29 @@
+{
+  "type": "record",
+  "name": "MemberJoined",
+  "namespace": "com.betamis.league.event",
+  "doc": "Emitted by league-service when a user joins a league.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string",
+      "doc": "Unique event identifier (UUID)."
+    },
+    {
+      "name": "leagueId",
+      "type": "string",
+      "doc": "Identifier of the league."
+    },
+    {
+      "name": "userId",
+      "type": "string",
+      "doc": "Identifier of the user who joined."
+    },
+    {
+      "name": "occurredAt",
+      "type": { "type": "long", "logicalType": "timestamp-millis" },
+      "doc": "Wall-clock time at which the event was produced."
+    }
+  ]
+}
+
