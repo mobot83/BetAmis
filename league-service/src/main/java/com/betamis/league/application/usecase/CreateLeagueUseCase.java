@@ -6,6 +6,7 @@ import com.betamis.league.domain.port.in.CreateLeague;
 import com.betamis.league.domain.port.out.LeagueEventPublisher;
 import com.betamis.league.domain.port.out.LeagueRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 
 @ApplicationScoped
@@ -14,6 +15,7 @@ public class CreateLeagueUseCase implements CreateLeague {
     private final LeagueRepository leagueRepository;
     private final LeagueEventPublisher eventPublisher;
 
+    @Inject
     public CreateLeagueUseCase(LeagueRepository leagueRepository,
                                LeagueEventPublisher eventPublisher) {
         this.leagueRepository = leagueRepository;

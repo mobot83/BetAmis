@@ -75,7 +75,7 @@ class LeagueRepositoryAdapterIT {
 
         // Reload fresh from DB so the join operates on a clean aggregate
         League reloaded = leagueRepository.findById(leagueId).orElseThrow();
-        reloaded.join("member-2", code);
+        reloaded.join("member-2", code, Instant.now());
         leagueRepository.save(reloaded);
         em.flush();
         em.clear();

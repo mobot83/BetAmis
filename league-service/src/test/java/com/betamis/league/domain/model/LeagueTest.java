@@ -51,7 +51,7 @@ class LeagueTest {
         league.pollDomainEvents(); // consume creation event
 
         String code = league.getInvitations().get(0).code();
-        league.join("user-2", code);
+        league.join("user-2", code, Instant.now());
 
         assertEquals(2, league.getMemberships().size());
         assertTrue(league.getMemberships().stream().anyMatch(m -> m.userId().equals("user-2")));
@@ -70,7 +70,7 @@ class LeagueTest {
         League league = League.create("World Cup 2026", "user-1");
         String code = league.getInvitations().get(0).code();
 
-        assertThrows(AlreadyMemberException.class, () -> league.join("user-1", code));
+        assertThrows(AlreadyMemberException.class, () -> league.join("user-1", code, Instant.now()));
     }
 
     @Test
@@ -78,7 +78,7 @@ class LeagueTest {
     void joinShouldThrowForUnknownCode() {
         League league = League.create("World Cup 2026", "user-1");
 
-        assertThrows(InvalidInvitationCodeException.class, () -> league.join("user-2", "BADCOD"));
+        assertThrows(InvalidInvitationCodeException.class, () -> league.join("user-2", "BADCOD", Instant.now()));
     }
 
     @Test
@@ -91,7 +91,7 @@ class LeagueTest {
                 List.of(expired),
                 Instant.now());
 
-        assertThrows(InvalidInvitationCodeException.class, () -> league.join("user-2", "EXP001"));
+        assertThrows(InvalidInvitationCodeException.class, () -> league.join("user-2", "EXP001", Instant.now()));
     }
 
     @Test

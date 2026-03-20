@@ -1,6 +1,7 @@
 package com.betamis.league.application.usecase;
 
 import com.betamis.league.domain.event.MemberJoined;
+import com.betamis.league.domain.exception.AlreadyMemberException;
 import com.betamis.league.domain.exception.InvalidInvitationCodeException;
 import com.betamis.league.domain.exception.LeagueNotFoundException;
 import com.betamis.league.domain.model.Invitation;
@@ -73,6 +74,22 @@ class JoinLeagueUseCaseTest {
 
         assertThrows(InvalidInvitationCodeException.class,
                 () -> useCase.join("league-1", "user-2", "BADCOD"));
+        verify(publisher, never()).publish(any(MemberJoined.class));
+    }
+
+    @Test
+    @DisplayName("join() should throw AlreadyMemberException when user is already a member")
+    void shouldThrowWhenAlreadyMember() {
+        Invitation inv = Invitation.generate(Instant.now());
+        League league = League.reconstitute("league-1", "Test", "user-1",
+                List.of(new Membership("user-1", Instant.now())),
+                List.of(inv),
+                Instant.now());
+        when(repository.findById("league-1")).thenReturn(Optional.of(league));
+
+        assertThrows(AlreadyMemberException.class,
+                () -> useCase.join("league-1", "user-1", inv.code()));
+        verify(repository, never()).save(any());
         verify(publisher, never()).publish(any(MemberJoined.class));
     }
 }

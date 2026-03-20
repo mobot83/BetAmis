@@ -30,11 +30,21 @@ public class LeagueResource {
     private static final String USER_ROLE = "betamis-user";
     private static final int MAX_NAME_LENGTH = 255;
 
-    @Inject CreateLeague createLeague;
-    @Inject GetLeague    getLeague;
-    @Inject JoinLeague   joinLeague;
-    @Inject ListMembers  listMembers;
-    @Inject SecurityIdentity identity;
+    private final CreateLeague createLeague;
+    private final GetLeague getLeague;
+    private final JoinLeague joinLeague;
+    private final ListMembers listMembers;
+    private final SecurityIdentity identity;
+
+    @Inject
+    public LeagueResource(CreateLeague createLeague, GetLeague getLeague, JoinLeague joinLeague,
+                          ListMembers listMembers, SecurityIdentity identity) {
+        this.createLeague = createLeague;
+        this.getLeague = getLeague;
+        this.joinLeague = joinLeague;
+        this.listMembers = listMembers;
+        this.identity = identity;
+    }
 
     /**
      * POST /leagues — Create a new league.

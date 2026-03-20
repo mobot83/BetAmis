@@ -10,6 +10,7 @@ import com.betamis.league.infrastructure.persistence.entity.MembershipEntity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -69,6 +70,19 @@ public class LeagueRepositoryAdapter implements LeagueRepository {
         return LeagueEntity.<LeagueEntity>find("leagueId", id)
                 .firstResultOptional()
                 .map(LeagueRepositoryAdapter::toDomain);
+    }
+
+    @Override
+    @Transactional
+    public Optional<List<Membership>> findMembersByLeagueId(String leagueId) {
+        if (LeagueEntity.count("leagueId", leagueId) == 0) {
+            return Optional.empty();
+        }
+        List<Membership> members = MembershipEntity.<MembershipEntity>find("league.leagueId", leagueId)
+                .stream()
+                .map(m -> new Membership(m.userId, m.joinedAt))
+                .toList();
+        return Optional.of(members);
     }
 
     private static League toDomain(LeagueEntity e) {

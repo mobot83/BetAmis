@@ -55,7 +55,7 @@ public class League {
         Membership ownerMembership = new Membership(ownerId, now);
         League league = new League(id, name, ownerId,
                 List.of(ownerMembership), List.of(invitation), now);
-        league.domainEvents.add(LeagueCreated.of(league.id, league.name, league.ownerId, invitation.code()));
+        league.domainEvents.add(LeagueCreated.of(league.id, league.name, league.ownerId, invitation.code(), now));
         return league;
     }
 
@@ -79,18 +79,17 @@ public class League {
      * @throws AlreadyMemberException        if the user is already a member
      * @throws InvalidInvitationCodeException if the code is unknown or expired
      */
-    public void join(String userId, String code) {
+    public void join(String userId, String code, Instant now) {
         if (memberships.stream().anyMatch(m -> m.userId().equals(userId))) {
             throw new AlreadyMemberException(userId, id);
         }
-        Instant now = Instant.now();
         invitations.stream()
                 .filter(inv -> inv.code().equals(code) && inv.isValid(now))
                 .findFirst()
                 .orElseThrow(() -> new InvalidInvitationCodeException(code));
 
         memberships.add(new Membership(userId, now));
-        domainEvents.add(MemberJoined.of(id, userId));
+        domainEvents.add(MemberJoined.of(id, userId, now));
     }
 
     // ── Accessors ─────────────────────────────────────────────────────────────
