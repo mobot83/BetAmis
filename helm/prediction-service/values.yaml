@@ -11,6 +11,15 @@ service:
 healthPath: /q/health/ready
 livenessPath: /q/health/live
 
+ingress:
+  enabled: false
+  host: ""
+  paths:
+    - /predictions
+  tls: false
+  issuer: betamis-selfsigned
+  annotations: {}
+
 hpa:
   enabled: true
   minReplicas: 2

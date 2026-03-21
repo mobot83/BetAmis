@@ -1,0 +1,14 @@
+# kind-specific: run on the control-plane node via hostPort so that traffic
+# reaching host ports 80/443 (via extraPortMappings) hits the controller.
+controller:
+  replicaCount: 1
+  hostPort:
+    enabled: true
+  nodeSelector:
+    ingress-ready: "true"
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+  service:
+    type: NodePort

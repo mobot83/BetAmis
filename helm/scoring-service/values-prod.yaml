@@ -2,6 +2,12 @@ image:
   tag: 4ff9538f
   repository: ghcr.io/mobot83/betamis/scoring-service
 replicaCount: 2
+
+ingress:
+  enabled: true
+  host: api.betamis.example.com   # replace with real domain
+  tls: true
+  issuer: letsencrypt-prod
 config:
   DB_HOST: ""
   KAFKA_BOOTSTRAP_SERVERS: ""

@@ -3,4 +3,19 @@ apiVersion: kind.x-k8s.io/v1alpha4
 name: betamis
 nodes:
   - role: control-plane
+    # Label the node so ingress-nginx can schedule on it via nodeSelector
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    # Expose host ports 80/443 so the ingress controller is reachable from localhost
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 80
+        protocol: TCP
+      - containerPort: 443
+        hostPort: 443
+        protocol: TCP
   - role: worker

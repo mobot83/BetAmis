@@ -1,3 +1,9 @@
+repositories:
+  - name: ingress-nginx
+    url: https://kubernetes.github.io/ingress-nginx
+  - name: jetstack
+    url: https://charts.jetstack.io
+
 environments:
   dev:
     values:
@@ -9,6 +15,35 @@ environments:
 ---
 
 releases:
+
+  # ── Ingress controller ──────────────────────────────────────────────────────
+  - name: ingress-nginx
+    namespace: ingress-nginx
+    createNamespace: true
+    chart: ingress-nginx/ingress-nginx
+    version: "4.11.3"
+    values:
+      - ./helm/ingress-nginx/values.yaml
+      - ./helm/ingress-nginx/values-{{ .Environment.Name }}.yaml
+
+  # ── cert-manager ────────────────────────────────────────────────────────────
+  - name: cert-manager
+    namespace: cert-manager
+    createNamespace: true
+    chart: jetstack/cert-manager
+    version: "v1.17.1"
+    values:
+      - ./helm/cert-manager/values.yaml
+
+  # ── ClusterIssuer (self-signed dev / ACME prod) ──────────────────────────────
+  - name: cert-issuer
+    namespace: cert-manager
+    chart: ./helm/cert-issuer
+    needs:
+      - cert-manager/cert-manager
+    values:
+      - ./helm/cert-issuer/values.yaml
+      - ./helm/cert-issuer/values-{{ .Environment.Name }}.yaml
 
   # ── Infrastructure ──────────────────────────────────────────────────────────
   - name: betamis-infra

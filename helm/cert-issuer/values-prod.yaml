@@ -1,0 +1,6 @@
+issuer:
+  name: letsencrypt-prod
+  type: acme
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: ""   # Set to your email before deploying to prod

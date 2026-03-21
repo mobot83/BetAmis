@@ -1,0 +1,5 @@
+apiVersion: v2
+name: cert-issuer
+description: BetAmis — cert-manager ClusterIssuer (self-signed for dev, ACME for prod)
+type: application
+version: 0.1.0

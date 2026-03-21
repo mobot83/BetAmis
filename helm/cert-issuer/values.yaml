@@ -1,0 +1,6 @@
+issuer:
+  name: betamis-selfsigned
+  type: selfsigned   # selfsigned | acme
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: ""        # Required for acme — set in values-prod.yaml

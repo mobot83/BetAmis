@@ -1,0 +1,18 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: {{ .Values.issuer.name }}
+spec:
+  {{- if eq .Values.issuer.type "selfsigned" }}
+  selfSigned: {}
+  {{- else if eq .Values.issuer.type "acme" }}
+  acme:
+    server: {{ .Values.issuer.acme.server }}
+    email: {{ .Values.issuer.acme.email }}
+    privateKeySecretRef:
+      name: {{ .Values.issuer.name }}-key
+    solvers:
+      - http01:
+          ingress:
+            ingressClassName: nginx
+  {{- end }}
