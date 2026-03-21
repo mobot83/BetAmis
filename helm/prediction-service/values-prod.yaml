@@ -1,8 +1,7 @@
 image:
-  tag: latest
-
+  tag: 3e03cf92
+  repository: ghcr.io/mobot83/betamis/prediction-service
 replicaCount: 2
-
 config:
   DB_HOST: ""
   KAFKA_BOOTSTRAP_SERVERS: ""
@@ -10,7 +9,6 @@ config:
   JWT_PUBLIC_KEY_LOCATION: ""
   JWT_ISSUER: ""
   OTEL_EXPORTER_OTLP_ENDPOINT: ""
-
 secret:
   create: false
   existingSecret: betamis-prod-secrets
