@@ -8,9 +8,15 @@ environments:
   dev:
     values:
       - environment: dev
+        appNamespace: betamis-dev
+  staging:
+    values:
+      - environment: staging
+        appNamespace: betamis-staging
   prod:
     values:
       - environment: prod
+        appNamespace: betamis-prod
 
 ---
 
@@ -56,7 +62,7 @@ releases:
 
   # ── Application services ────────────────────────────────────────────────────
   - name: league-service
-    namespace: betamis-dev
+    namespace: {{ .Values.appNamespace }}
     createNamespace: true
     chart: ./helm/league-service
     needs:
@@ -67,7 +73,8 @@ releases:
       - ./helm/league-service/values-{{ .Environment.Name }}.yaml
 
   - name: prediction-service
-    namespace: betamis-dev
+    namespace: {{ .Values.appNamespace }}
+    createNamespace: true
     chart: ./helm/prediction-service
     needs:
       - betamis-infra/betamis-infra
@@ -77,7 +84,8 @@ releases:
       - ./helm/prediction-service/values-{{ .Environment.Name }}.yaml
 
   - name: match-service
-    namespace: betamis-dev
+    namespace: {{ .Values.appNamespace }}
+    createNamespace: true
     chart: ./helm/match-service
     needs:
       - betamis-infra/betamis-infra
@@ -87,7 +95,8 @@ releases:
       - ./helm/match-service/values-{{ .Environment.Name }}.yaml
 
   - name: scoring-service
-    namespace: betamis-dev
+    namespace: {{ .Values.appNamespace }}
+    createNamespace: true
     chart: ./helm/scoring-service
     needs:
       - betamis-infra/betamis-infra

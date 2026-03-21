@@ -1,6 +1,11 @@
+image:
+  repository: ghcr.io/mobot83/betamis/match-service
+  tag: latest   # updated by CI on staging branch push
+replicaCount: 1
+
 ingress:
   enabled: true
-  host: betamis.local
+  host: staging.betamis.local
   tls: true
   tlsSecretName: betamis-local-tls
 

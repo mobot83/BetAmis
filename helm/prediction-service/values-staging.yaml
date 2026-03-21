@@ -1,8 +1,21 @@
+image:
+  repository: ghcr.io/mobot83/betamis/prediction-service
+  tag: latest   # updated by CI on staging branch push
+replicaCount: 1
+
 ingress:
   enabled: true
-  host: betamis.local
+  host: staging.betamis.local
   tls: true
   tlsSecretName: betamis-local-tls
+
+resources:
+  requests:
+    memory: "384Mi"
+    cpu: "100m"
+  limits:
+    memory: "768Mi"
+    cpu: "1000m"
 
 config:
   DB_HOST: postgres.betamis-infra.svc.cluster.local
@@ -10,10 +23,10 @@ config:
   KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry.betamis-infra.svc.cluster.local:8081
   JWT_PUBLIC_KEY_LOCATION: http://keycloak.betamis-infra.svc.cluster.local:8080/realms/betamis/protocol/openid-connect/certs
   JWT_ISSUER: http://keycloak.betamis-infra.svc.cluster.local:8080/realms/betamis
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.betamis-infra.svc.cluster.local:4317
 
 secret:
   create: true
   data:
     DB_USERNAME: betamis
     DB_PASSWORD: betamis_secret
-    FOOTBALL_DATA_API_TOKEN: "replace-me"

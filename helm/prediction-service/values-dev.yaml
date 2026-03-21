@@ -1,6 +1,8 @@
 ingress:
   enabled: true
-  host: api.betamis.localdev
+  host: betamis.local
+  tls: true
+  tlsSecretName: betamis-local-tls
 
 config:
   DB_HOST: postgres.betamis-infra.svc.cluster.local

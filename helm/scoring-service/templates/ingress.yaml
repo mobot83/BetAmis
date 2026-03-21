@@ -7,8 +7,11 @@ metadata:
   labels:
     {{- include "betamis.labels" . | nindent 4 }}
   annotations:
-    {{- if .Values.ingress.tls }}
+    {{- if and .Values.ingress.tls (not .Values.ingress.tlsSecretName) }}
     cert-manager.io/cluster-issuer: {{ .Values.ingress.issuer }}
+    {{- end }}
+    {{- if .Values.ingress.rewriteTarget }}
+    nginx.ingress.kubernetes.io/rewrite-target: {{ .Values.ingress.rewriteTarget }}
     {{- end }}
     {{- with .Values.ingress.annotations }}
     {{- toYaml . | nindent 4 }}
@@ -19,7 +22,7 @@ spec:
   tls:
     - hosts:
         - {{ .Values.ingress.host }}
-      secretName: {{ .Chart.Name }}-tls
+      secretName: {{ .Values.ingress.tlsSecretName | default (printf "%s-tls" .Chart.Name) }}
   {{- end }}
   rules:
     - host: {{ .Values.ingress.host }}
@@ -27,7 +30,7 @@ spec:
         paths:
           {{- range .Values.ingress.paths }}
           - path: {{ . }}
-            pathType: Prefix
+            pathType: {{ if $.Values.ingress.rewriteTarget }}ImplementationSpecific{{ else }}Prefix{{ end }}
             backend:
               service:
                 name: {{ $.Chart.Name }}

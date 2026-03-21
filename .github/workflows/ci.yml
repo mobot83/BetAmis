@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, staging]
   pull_request:
-    branches: [main]
+    branches: [main, staging]
 
 env:
   REGISTRY: ghcr.io
@@ -73,7 +73,7 @@ jobs:
     needs: [changes, test]
     if: >
       github.event_name == 'push' &&
-      github.ref == 'refs/heads/main' &&
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging') &&
       needs.changes.outputs.services != '[]' &&
       needs.changes.outputs.services != ''
     runs-on: ubuntu-latest
@@ -119,23 +119,27 @@ jobs:
           IMAGE_REPO: ${{ env.REGISTRY }}/${{ github.repository_owner }}/betamis/${{ matrix.service }}
           IMAGE_TAG: ${{ steps.sha.outputs.short }}
           SERVICE: ${{ matrix.service }}
+          BRANCH: ${{ github.ref_name }}
         run: |
-          yq e ".image.repository = \"${IMAGE_REPO}\"" -i helm/${SERVICE}/values-prod.yaml
-          yq e ".image.tag = \"${IMAGE_TAG}\"" -i helm/${SERVICE}/values-prod.yaml
+          VALUES_FILE="helm/${SERVICE}/values-prod.yaml"
+          [[ "${BRANCH}" == "staging" ]] && VALUES_FILE="helm/${SERVICE}/values-staging.yaml"
+
+          yq e ".image.repository = \"${IMAGE_REPO}\"" -i "${VALUES_FILE}"
+          yq e ".image.tag = \"${IMAGE_TAG}\"" -i "${VALUES_FILE}"
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add helm/${SERVICE}/values-prod.yaml
+          git add "${VALUES_FILE}"
 
           # Exit cleanly if nothing changed (image tag identical to previous push)
           git diff --cached --quiet && echo "Image tag unchanged — skipping commit." && exit 0
 
           git commit -m "ci(${SERVICE}): bump image tag to ${IMAGE_TAG} [skip ci]"
           # Retry push to handle the race condition when parallel matrix jobs
-          # all try to push to main at the same time.
+          # all try to push at the same time.
           for attempt in 1 2 3; do
-            git pull --rebase origin main
-            git push origin main && exit 0
+            git pull --rebase origin "${BRANCH}"
+            git push origin "${BRANCH}" && exit 0
             echo "Push attempt ${attempt} failed, retrying in ${attempt}s..."
             sleep "${attempt}"
           done

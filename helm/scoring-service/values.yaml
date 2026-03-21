@@ -15,8 +15,10 @@ ingress:
   enabled: false
   host: ""
   paths:
-    - /rankings
+    - "/api/rankings(/|$)(.*)"
+  rewriteTarget: "/$2"
   tls: false
+  tlsSecretName: ""
   issuer: betamis-selfsigned
   annotations: {}
 

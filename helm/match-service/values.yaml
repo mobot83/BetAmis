@@ -15,8 +15,10 @@ ingress:
   enabled: false
   host: ""
   paths:
-    - /matches
+    - "/api/matches(/|$)(.*)"
+  rewriteTarget: "/$2"
   tls: false
+  tlsSecretName: ""
   issuer: betamis-selfsigned
   annotations: {}
 

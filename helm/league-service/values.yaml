@@ -15,8 +15,10 @@ ingress:
   enabled: false
   host: ""
   paths:
-    - /leagues
+    - "/api/leagues(/|$)(.*)"
+  rewriteTarget: "/$2"
   tls: false
+  tlsSecretName: ""
   issuer: betamis-selfsigned
   annotations: {}
 

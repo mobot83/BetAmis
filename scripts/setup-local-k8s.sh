@@ -148,6 +148,34 @@ install_argocd() {
   success "Root application applied — ArgoCD will reconcile all child apps."
 }
 
+# ── mkcert TLS ─────────────────────────────────────────────────────────────────
+setup_mkcert_tls() {
+  if ! command -v mkcert &>/dev/null; then
+    warn "mkcert not found — skipping TLS secret creation (HTTPS will not work)."
+    warn "Install mkcert: https://github.com/FiloSottile/mkcert"
+    return
+  fi
+
+  info "Installing mkcert CA and generating certificate..."
+  mkcert -install
+  mkcert \
+    -cert-file /tmp/betamis-local.pem \
+    -key-file  /tmp/betamis-local-key.pem \
+    betamis.local staging.betamis.local
+
+  for ns in betamis-dev betamis-staging; do
+    kubectl create namespace "$ns" --dry-run=client -o yaml | kubectl apply -f -
+    kubectl create secret tls betamis-local-tls \
+      --cert=/tmp/betamis-local.pem \
+      --key=/tmp/betamis-local-key.pem \
+      -n "$ns" \
+      --dry-run=client -o yaml | kubectl apply -f -
+  done
+
+  rm -f /tmp/betamis-local.pem /tmp/betamis-local-key.pem
+  success "TLS secret betamis-local-tls created in betamis-dev and betamis-staging."
+}
+
 # ── Apply manifests ────────────────────────────────────────────────────────────
 apply_manifests() {
   if ! command -v helmfile &>/dev/null; then
@@ -166,16 +194,22 @@ print_access_info() {
   echo -e "${GREEN} BetAmis is running on kind cluster '${CLUSTER_NAME}'${NC}"
   echo -e "${GREEN}============================================================${NC}"
   echo ""
-  echo "Services are exposed via Nginx Ingress on http://api.betamis.localdev"
+  echo "Services are exposed via Nginx Ingress with TLS (mkcert)."
   echo ""
   echo "Add to /etc/hosts (once, requires sudo):"
-  echo "  echo '127.0.0.1  api.betamis.localdev' | sudo tee -a /etc/hosts"
+  echo "  echo '127.0.0.1  betamis.local staging.betamis.local' | sudo tee -a /etc/hosts"
   echo ""
-  echo "Endpoints:"
-  echo "  http://api.betamis.localdev/leagues"
-  echo "  http://api.betamis.localdev/predictions"
-  echo "  http://api.betamis.localdev/rankings"
-  echo "  http://api.betamis.localdev/matches"
+  echo "Dev endpoints (https://betamis.local):"
+  echo "  https://betamis.local/api/leagues"
+  echo "  https://betamis.local/api/predictions"
+  echo "  https://betamis.local/api/rankings"
+  echo "  https://betamis.local/api/matches"
+  echo ""
+  echo "Staging endpoints (https://staging.betamis.local):"
+  echo "  https://staging.betamis.local/api/leagues"
+  echo "  https://staging.betamis.local/api/predictions"
+  echo "  https://staging.betamis.local/api/rankings"
+  echo "  https://staging.betamis.local/api/matches"
   echo ""
   echo "Keycloak (port-forward):"
   echo "  kubectl port-forward -n betamis-infra svc/keycloak 8180:8080"
@@ -183,6 +217,7 @@ print_access_info() {
   echo "Useful commands:"
   echo "  kubectl get pods -n betamis-infra"
   echo "  kubectl get pods -n betamis-dev"
+  echo "  kubectl get pods -n betamis-staging"
   echo "  kubectl get pods -n betamis-prod"
   echo "  kubectl get applications -n argocd"
   echo "  kind delete cluster --name ${CLUSTER_NAME}   # tear down"
@@ -202,6 +237,7 @@ main() {
   create_cluster
   install_metrics_server
   build_and_load
+  setup_mkcert_tls
   install_argocd
   apply_manifests
   print_access_info

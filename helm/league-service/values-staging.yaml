@@ -1,6 +1,11 @@
+image:
+  repository: ghcr.io/mobot83/betamis/league-service
+  tag: latest   # updated by CI on staging branch push
+replicaCount: 1
+
 ingress:
   enabled: true
-  host: betamis.local
+  host: staging.betamis.local
   tls: true
   tlsSecretName: betamis-local-tls
 
@@ -16,4 +21,3 @@ secret:
   data:
     DB_USERNAME: betamis
     DB_PASSWORD: betamis_secret
-    FOOTBALL_DATA_API_TOKEN: "replace-me"

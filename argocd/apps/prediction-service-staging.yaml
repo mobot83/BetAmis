@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prediction-service-staging
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    notifications.argoproj.io/subscribe.on-deployed.slack: betamis-deploys
+    notifications.argoproj.io/subscribe.on-sync-failed.slack: betamis-deploys
+    notifications.argoproj.io/subscribe.on-deployed.email: betamis-team
+    notifications.argoproj.io/subscribe.on-sync-failed.email: betamis-team
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/mobot83/BetAmis
+    targetRevision: staging
+    path: helm/prediction-service
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-staging.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: betamis-staging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
