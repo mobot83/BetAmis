@@ -1,15 +1,13 @@
 image:
-  tag: latest
-
+  tag: 3e03cf92
+  repository: ghcr.io/mobot83/betamis/scoring-service
 replicaCount: 2
-
 config:
   DB_HOST: ""
   KAFKA_BOOTSTRAP_SERVERS: ""
   KAFKA_SCHEMA_REGISTRY_URL: ""
   REDIS_HOST: ""
   OTEL_EXPORTER_OTLP_ENDPOINT: ""
-
 secret:
   create: false
   existingSecret: betamis-prod-secrets
