@@ -61,6 +61,7 @@ releases:
     chart: ./helm/league-service
     needs:
       - betamis-infra/betamis-infra
+      - ingress-nginx/ingress-nginx
     values:
       - ./helm/league-service/values.yaml
       - ./helm/league-service/values-{{ .Environment.Name }}.yaml
@@ -70,6 +71,7 @@ releases:
     chart: ./helm/prediction-service
     needs:
       - betamis-infra/betamis-infra
+      - ingress-nginx/ingress-nginx
     values:
       - ./helm/prediction-service/values.yaml
       - ./helm/prediction-service/values-{{ .Environment.Name }}.yaml
@@ -79,6 +81,7 @@ releases:
     chart: ./helm/match-service
     needs:
       - betamis-infra/betamis-infra
+      - ingress-nginx/ingress-nginx
     values:
       - ./helm/match-service/values.yaml
       - ./helm/match-service/values-{{ .Environment.Name }}.yaml
@@ -88,6 +91,7 @@ releases:
     chart: ./helm/scoring-service
     needs:
       - betamis-infra/betamis-infra
+      - ingress-nginx/ingress-nginx
     values:
       - ./helm/scoring-service/values.yaml
       - ./helm/scoring-service/values-{{ .Environment.Name }}.yaml

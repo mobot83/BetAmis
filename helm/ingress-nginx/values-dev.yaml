@@ -12,3 +12,8 @@ controller:
       effect: NoSchedule
   service:
     type: NodePort
+  # Admission webhooks require the controller to be running before any Ingress
+  # resource can be created. In kind the webhook server is often not ready in
+  # time, causing helm to fail. Disable it for local dev — prod keeps it on.
+  admissionWebhooks:
+    enabled: false
