@@ -9,7 +9,7 @@
 #   --skip-build    Skip Maven build and Docker image creation
 #   --skip-cluster  Skip kind cluster creation (use existing cluster)
 #
-# Prerequisites: kind, kubectl, docker, mvn (or ./mvnw)
+# Prerequisites: kind, kubectl, docker
 # =============================================================
 
 set -euo pipefail
@@ -46,16 +46,6 @@ check_prereqs() {
     error "Missing required tools: ${missing[*]}"
   fi
 
-  # Resolve Maven wrapper or system mvn
-  if [[ -f "$ROOT_DIR/mvnw" ]]; then
-    MVN="$ROOT_DIR/mvnw"
-  elif command -v mvn &>/dev/null; then
-    MVN="mvn"
-  elif [[ "$SKIP_BUILD" == "true" ]]; then
-    MVN=""
-  else
-    error "Neither ./mvnw nor mvn found. Install Maven or use --skip-build."
-  fi
   success "All prerequisites satisfied."
 }
 
@@ -93,12 +83,9 @@ build_and_load() {
 
   for svc in "${SERVICES[@]}"; do
     info "Building ${svc}..."
-    (
-      cd "$ROOT_DIR/${svc}"
-      $MVN package -DskipTests -q
-      docker build -f src/main/docker/Dockerfile.jvm \
-        -t "betamis/${svc}:dev" .
-    )
+    docker build -f "${svc}/Dockerfile" \
+      -t "betamis/${svc}:dev" \
+      "$ROOT_DIR"
     info "Loading betamis/${svc}:dev into kind..."
     kind load docker-image "betamis/${svc}:dev" --name "$CLUSTER_NAME"
     success "${svc} built and loaded."

@@ -1,13 +1,13 @@
 package com.betamis.scoring.contract;
 
-import au.com.dius.pact.consumer.MessagePactBuilder;
+import au.com.dius.pact.consumer.dsl.PactBuilder;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.consumer.junit5.ProviderType;
+import au.com.dius.pact.core.model.V4Interaction;
+import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
-import au.com.dius.pact.core.model.messaging.Message;
-import au.com.dius.pact.core.model.messaging.MessagePact;
 import com.betamis.prediction.event.PredictionSubmitted;
 import com.betamis.prediction.event.Score;
 import com.betamis.scoring.domain.model.StoredPrediction;
@@ -21,7 +21,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 
 import java.time.Instant;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -43,7 +42,7 @@ class PredictionSubmittedPactConsumerTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Pact(consumer = "scoring-service")
-    MessagePact predictionSubmittedPact(MessagePactBuilder builder) {
+    public V4Pact predictionSubmittedPact(PactBuilder builder) {
         PactDslJsonBody content = new PactDslJsonBody()
                 .stringType("id", "event-uuid-1")
                 .stringType("predictionId", "pred-uuid-1")
@@ -57,7 +56,7 @@ class PredictionSubmittedPactConsumerTest {
                 .integerType("awayTeamScore", 1)
                 .closeObject();
 
-        return builder
+        return builder.usingLegacyMessageDsl()
                 .expectsToReceive("a prediction submitted event")
                 .withContent(content)
                 .toPact();
@@ -66,10 +65,10 @@ class PredictionSubmittedPactConsumerTest {
     @Test
     @PactTestFor(pactMethod = "predictionSubmittedPact")
     @DisplayName("scoring-service consumer can process a prediction.submitted event from prediction-service")
-    void shouldProcessPredictionSubmittedEvent(List<Message> messages) throws Exception {
+    void shouldProcessPredictionSubmittedEvent(V4Interaction.AsynchronousMessage message) throws Exception {
         // Pact gives us the message body as JSON bytes; convert to the Avro object
         // that SmallRye would normally deserialize from the Kafka topic.
-        byte[] body = messages.get(0).contentsAsBytes();
+        byte[] body = message.contentsAsBytes();
         JsonNode node = MAPPER.readTree(body);
 
         PredictionSubmitted event = PredictionSubmitted.newBuilder()

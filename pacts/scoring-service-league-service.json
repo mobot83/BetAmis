@@ -7,19 +7,14 @@
       "contents": {
         "content": {
           "id": "event-uuid-1",
-          "matchId": "match-uuid-1",
+          "leagueId": "league-uuid-1",
           "occurredAt": 1710000000000,
-          "predictionId": "pred-uuid-1",
-          "score": {
-            "awayTeamScore": 1,
-            "homeTeamScore": 2
-          },
           "userId": "user-uuid-1"
         },
         "contentType": "application/json",
         "encoded": false
       },
-      "description": "a prediction submitted event",
+      "description": "a member joined event",
       "key": "",
       "matchingRules": {
         "body": {
@@ -31,7 +26,7 @@
               }
             ]
           },
-          "$.matchId": {
+          "$.leagueId": {
             "combine": "AND",
             "matchers": [
               {
@@ -40,30 +35,6 @@
             ]
           },
           "$.occurredAt": {
-            "combine": "AND",
-            "matchers": [
-              {
-                "match": "integer"
-              }
-            ]
-          },
-          "$.predictionId": {
-            "combine": "AND",
-            "matchers": [
-              {
-                "match": "type"
-              }
-            ]
-          },
-          "$.score.awayTeamScore": {
-            "combine": "AND",
-            "matchers": [
-              {
-                "match": "integer"
-              }
-            ]
-          },
-          "$.score.homeTeamScore": {
             "combine": "AND",
             "matchers": [
               {
@@ -97,6 +68,6 @@
     }
   },
   "provider": {
-    "name": "prediction-service"
+    "name": "league-service"
   }
 }
