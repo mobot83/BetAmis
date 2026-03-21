@@ -182,14 +182,24 @@ apply_manifests() {
     error "helmfile not found. Install it: https://github.com/helmfile/helmfile/releases"
   fi
 
-  # Remove any stale ingress-nginx admission webhook that may linger from a
-  # previous install with webhooks enabled. Our dev config disables the webhook,
-  # but the ValidatingWebhookConfiguration can survive a helm upgrade/reinstall
-  # and will block Ingress creation if the controller isn't listening on 443.
+  # Phase 1 — deploy ingress-nginx and wait until the controller pod is Ready.
+  # helmfile release has wait:true but we drive it explicitly here so the VWC
+  # purge below happens only after the controller is confirmed healthy.
+  info "Deploying ingress-nginx (waiting for pod ready)..."
+  helmfile sync -e dev -l name=ingress-nginx
+
+  # Phase 2 — remove the admission ValidatingWebhookConfiguration.
+  # The ingress-nginx controller self-registers the VWC at startup even when
+  # admissionWebhooks.enabled: false is set in Helm values. Until the pod is
+  # fully Ready the webhook endpoint is unreachable, causing Ingress creation
+  # to fail. We delete it here (after the pod is up) so subsequent Ingress
+  # resources created by the service releases are never blocked.
+  info "Removing ingress-nginx admission webhook..."
   kubectl delete validatingwebhookconfiguration ingress-nginx-admission \
     --ignore-not-found 2>/dev/null || true
 
-  info "Deploying full environment via helmfile..."
+  # Phase 3 — deploy the rest (cert-manager, infra, services).
+  info "Deploying remaining releases..."
   helmfile sync -e dev
   success "All releases deployed."
 }
