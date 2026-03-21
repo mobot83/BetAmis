@@ -131,6 +131,12 @@ jobs:
           git diff --cached --quiet && echo "Image tag unchanged — skipping commit." && exit 0
 
           git commit -m "ci(${SERVICE}): bump image tag to ${IMAGE_TAG} [skip ci]"
-          # Rebase in case a parallel matrix job pushed first, then retry once
-          git pull --rebase origin main
-          git push origin main
+          # Retry push to handle the race condition when parallel matrix jobs
+          # all try to push to main at the same time.
+          for attempt in 1 2 3; do
+            git pull --rebase origin main
+            git push origin main && exit 0
+            echo "Push attempt ${attempt} failed, retrying in ${attempt}s..."
+            sleep "${attempt}"
+          done
+          exit 1
