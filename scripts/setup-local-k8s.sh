@@ -3,27 +3,34 @@
 # BetAmis — Local Kubernetes setup with kind
 # =============================================================
 # Usage:
-#   ./scripts/setup-local-k8s.sh [--skip-build] [--skip-cluster]
+#   ./scripts/setup-local-k8s.sh [--skip-build] [--skip-cluster] [--skip-argocd]
 #
 # Options:
-#   --skip-build    Skip Maven build and Docker image creation
+#   --skip-build    Skip Docker image build and kind load
 #   --skip-cluster  Skip kind cluster creation (use existing cluster)
+#   --skip-argocd   Skip ArgoCD installation and root-app bootstrap
 #
 # Prerequisites: kind, kubectl, docker
+#
+# ArgoCD is installed automatically and manages the betamis-prod namespace.
+# Helmfile continues to manage betamis-dev for local iteration.
 # =============================================================
 
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CLUSTER_NAME="betamis"
+ARGOCD_VERSION="v2.13.3"
 SKIP_BUILD=false
 SKIP_CLUSTER=false
+SKIP_ARGOCD=false
 
 # ── Parse arguments ────────────────────────────────────────────────────────────
 for arg in "$@"; do
   case $arg in
-    --skip-build)   SKIP_BUILD=true ;;
-    --skip-cluster) SKIP_CLUSTER=true ;;
+    --skip-build)    SKIP_BUILD=true ;;
+    --skip-cluster)  SKIP_CLUSTER=true ;;
+    --skip-argocd)   SKIP_ARGOCD=true ;;
     *) echo "Unknown argument: $arg" && exit 1 ;;
   esac
 done
@@ -108,6 +115,39 @@ install_metrics_server() {
   success "metrics-server installed."
 }
 
+# ── ArgoCD ─────────────────────────────────────────────────────────────────────
+install_argocd() {
+  if [[ "$SKIP_ARGOCD" == "true" ]]; then
+    info "Skipping ArgoCD installation (--skip-argocd)."
+    return
+  fi
+
+  if kubectl get deployment argocd-server -n argocd &>/dev/null; then
+    info "ArgoCD already installed — skipping."
+  else
+    info "Installing ArgoCD ${ARGOCD_VERSION}..."
+    kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
+    kubectl apply -n argocd \
+      -f "https://raw.githubusercontent.com/argoproj/argo-cd/${ARGOCD_VERSION}/manifests/install.yaml"
+    info "Waiting for ArgoCD server to be ready (up to 3 min)..."
+    kubectl rollout status deployment argocd-server -n argocd --timeout=180s
+    success "ArgoCD ${ARGOCD_VERSION} installed."
+  fi
+
+  info "Applying ArgoCD notifications config..."
+  kubectl apply -f "$ROOT_DIR/argocd/notifications/argocd-notifications-cm.yaml"
+  # Secret is a template — only apply if it hasn't been created yet so existing
+  # credentials are not overwritten by the empty placeholder.
+  if ! kubectl get secret argocd-notifications-secret -n argocd &>/dev/null; then
+    kubectl apply -f "$ROOT_DIR/argocd/notifications/argocd-notifications-secret.yaml"
+    warn "argocd-notifications-secret created with empty values. Populate Slack/email creds before notifications will fire."
+  fi
+
+  info "Applying ArgoCD root application (App of Apps)..."
+  kubectl apply -f "$ROOT_DIR/argocd/root-app.yaml"
+  success "Root application applied — ArgoCD will reconcile all child apps."
+}
+
 # ── Apply manifests ────────────────────────────────────────────────────────────
 apply_manifests() {
   if ! command -v helmfile &>/dev/null; then
@@ -146,9 +186,17 @@ print_access_info() {
   echo "Useful commands:"
   echo "  kubectl get pods -n betamis-infra"
   echo "  kubectl get pods -n betamis-dev"
+  echo "  kubectl get pods -n betamis-prod"
+  echo "  kubectl get applications -n argocd"
   echo "  kind delete cluster --name ${CLUSTER_NAME}   # tear down"
   echo ""
-  warn "Remember to set FOOTBALL_DATA_API_TOKEN in k8s/services/secret.yaml before deploying match-service."
+  echo "  # ArgoCD UI"
+  echo "  kubectl port-forward -n argocd svc/argocd-server 8443:443"
+  echo "  # Initial admin password:"
+  echo "  kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath='{.data.password}' | base64 -d"
+  echo ""
+  warn "Remember to populate argocd-notifications-secret with Slack/email creds."
+  warn "Remember to set FOOTBALL_DATA_API_TOKEN in helm/match-service/values-prod.yaml before deploying match-service."
 }
 
 # ── Main ───────────────────────────────────────────────────────────────────────
@@ -157,6 +205,7 @@ main() {
   create_cluster
   install_metrics_server
   build_and_load
+  install_argocd
   apply_manifests
   print_access_info
 }

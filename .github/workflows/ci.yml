@@ -84,7 +84,6 @@ jobs:
     permissions:
       contents: write
       packages: write
-      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
@@ -115,7 +114,7 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
 
-      - name: Update Helm image tag
+      - name: Commit and push Helm image tag
         env:
           IMAGE_REPO: ${{ env.REGISTRY }}/${{ github.repository_owner }}/betamis/${{ matrix.service }}
           IMAGE_TAG: ${{ steps.sha.outputs.short }}
@@ -124,21 +123,14 @@ jobs:
           yq e ".image.repository = \"${IMAGE_REPO}\"" -i helm/${SERVICE}/values-prod.yaml
           yq e ".image.tag = \"${IMAGE_TAG}\"" -i helm/${SERVICE}/values-prod.yaml
 
-      - name: Open Helm update PR
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "ci(${{ matrix.service }}): bump image tag to ${{ steps.sha.outputs.short }}"
-          branch: ci/helm-update-${{ matrix.service }}-${{ steps.sha.outputs.short }}
-          delete-branch: true
-          title: "ci(${{ matrix.service }}): bump image tag to ${{ steps.sha.outputs.short }}"
-          body: |
-            Automated Helm values update triggered by push to `main`.
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add helm/${SERVICE}/values-prod.yaml
 
-            | Field   | Value |
-            |---------|-------|
-            | Service | `${{ matrix.service }}` |
-            | Image   | `${{ env.REGISTRY }}/${{ github.repository_owner }}/betamis/${{ matrix.service }}` |
-            | Tag     | `${{ steps.sha.outputs.short }}` |
-            | Commit  | ${{ github.sha }} |
-          labels: ci,helm-update
+          # Exit cleanly if nothing changed (image tag identical to previous push)
+          git diff --cached --quiet && echo "Image tag unchanged — skipping commit." && exit 0
+
+          git commit -m "ci(${SERVICE}): bump image tag to ${IMAGE_TAG} [skip ci]"
+          # Rebase in case a parallel matrix job pushed first, then retry once
+          git pull --rebase origin main
+          git push origin main
