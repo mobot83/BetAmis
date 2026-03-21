@@ -182,6 +182,13 @@ apply_manifests() {
     error "helmfile not found. Install it: https://github.com/helmfile/helmfile/releases"
   fi
 
+  # Remove any stale ingress-nginx admission webhook that may linger from a
+  # previous install with webhooks enabled. Our dev config disables the webhook,
+  # but the ValidatingWebhookConfiguration can survive a helm upgrade/reinstall
+  # and will block Ingress creation if the controller isn't listening on 443.
+  kubectl delete validatingwebhookconfiguration ingress-nginx-admission \
+    --ignore-not-found 2>/dev/null || true
+
   info "Deploying full environment via helmfile..."
   helmfile sync -e dev
   success "All releases deployed."
