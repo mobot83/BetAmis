@@ -182,23 +182,26 @@ apply_manifests() {
     error "helmfile not found. Install it: https://github.com/helmfile/helmfile/releases"
   fi
 
-  # Phase 1 — deploy ingress-nginx and wait until the controller pod is Ready.
-  # helmfile release has wait:true but we drive it explicitly here so the VWC
-  # purge below happens only after the controller is confirmed healthy.
-  info "Deploying ingress-nginx (waiting for pod ready)..."
+  # Phase 1 — deploy ingress-nginx manifest (helm returns immediately after apply).
+  info "Deploying ingress-nginx..."
   helmfile sync -e dev -l name=ingress-nginx
 
-  # Phase 2 — remove the admission ValidatingWebhookConfiguration.
-  # The ingress-nginx controller self-registers the VWC at startup even when
-  # admissionWebhooks.enabled: false is set in Helm values. Until the pod is
-  # fully Ready the webhook endpoint is unreachable, causing Ingress creation
-  # to fail. We delete it here (after the pod is up) so subsequent Ingress
-  # resources created by the service releases are never blocked.
-  info "Removing ingress-nginx admission webhook..."
+  # Phase 2 — wait for the controller pod to be Ready (image pull on a fresh
+  # cluster can take several minutes; use a generous 10-minute timeout).
+  info "Waiting for ingress-nginx controller to be Ready (up to 10 min)..."
+  kubectl rollout status deployment/ingress-nginx-controller \
+    -n ingress-nginx --timeout=600s \
+    || error "ingress-nginx controller did not become Ready in time."
+
+  # Phase 3 — remove the admission ValidatingWebhookConfiguration.
+  # The controller self-registers this VWC at startup regardless of the Helm
+  # admissionWebhooks.enabled value. Deleting it now (controller is running)
+  # prevents the webhook from blocking Ingress creation for service releases.
+  info "Removing ingress-nginx admission webhook (not needed in dev)..."
   kubectl delete validatingwebhookconfiguration ingress-nginx-admission \
     --ignore-not-found 2>/dev/null || true
 
-  # Phase 3 — deploy the rest (cert-manager, infra, services).
+  # Phase 4 — deploy the rest (cert-manager, infra, services).
   info "Deploying remaining releases..."
   helmfile sync -e dev
   success "All releases deployed."

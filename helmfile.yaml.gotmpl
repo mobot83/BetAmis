@@ -23,14 +23,11 @@ environments:
 releases:
 
   # ── Ingress controller ──────────────────────────────────────────────────────
-  # wait: true ensures the controller pod is Ready before helmfile proceeds to
-  # service releases, which is required for the admission webhook to respond.
   - name: ingress-nginx
     namespace: ingress-nginx
     createNamespace: true
     chart: ingress-nginx/ingress-nginx
     version: "4.11.3"
-    wait: true
     values:
       - ./helm/ingress-nginx/values.yaml
       - ./helm/ingress-nginx/values-{{ .Environment.Name }}.yaml
