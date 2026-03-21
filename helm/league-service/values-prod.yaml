@@ -1,6 +1,6 @@
 image:
-  tag: dev
-  repository: betamis/league-service
+  tag: 4ff9538f
+  repository: ghcr.io/mobot83/betamis/league-service
 replicaCount: 2
 config:
   DB_HOST: "" # set to managed DB host
