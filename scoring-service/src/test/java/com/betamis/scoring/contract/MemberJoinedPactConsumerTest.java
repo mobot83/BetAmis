@@ -1,13 +1,13 @@
 package com.betamis.scoring.contract;
 
-import au.com.dius.pact.consumer.MessagePactBuilder;
+import au.com.dius.pact.consumer.dsl.PactBuilder;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.consumer.junit5.ProviderType;
+import au.com.dius.pact.core.model.V4Interaction;
+import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
-import au.com.dius.pact.core.model.messaging.Message;
-import au.com.dius.pact.core.model.messaging.MessagePact;
 import com.betamis.league.event.MemberJoined;
 import com.betamis.scoring.domain.port.in.TrackLeagueMembership;
 import com.betamis.scoring.infrastructure.messaging.KafkaLeagueMemberConsumer;
@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.Instant;
-import java.util.List;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -39,14 +38,14 @@ class MemberJoinedPactConsumerTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Pact(consumer = "scoring-service")
-    MessagePact memberJoinedPact(MessagePactBuilder builder) {
+    public V4Pact memberJoinedPact(PactBuilder builder) {
         PactDslJsonBody content = new PactDslJsonBody()
                 .stringType("id", "event-uuid-1")
                 .stringType("leagueId", "league-uuid-1")
                 .stringType("userId", "user-uuid-1")
                 .integerType("occurredAt", 1710000000000L);
 
-        return builder
+        return builder.usingLegacyMessageDsl()
                 .expectsToReceive("a member joined event")
                 .withContent(content)
                 .toPact();
@@ -55,8 +54,8 @@ class MemberJoinedPactConsumerTest {
     @Test
     @PactTestFor(pactMethod = "memberJoinedPact")
     @DisplayName("scoring-service consumer can process a league.member-joined event from league-service")
-    void shouldProcessMemberJoinedEvent(List<Message> messages) throws Exception {
-        byte[] body = messages.get(0).contentsAsBytes();
+    void shouldProcessMemberJoinedEvent(V4Interaction.AsynchronousMessage message) throws Exception {
+        byte[] body = message.contentsAsBytes();
         JsonNode node = MAPPER.readTree(body);
 
         MemberJoined event = MemberJoined.newBuilder()

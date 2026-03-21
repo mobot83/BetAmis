@@ -17,7 +17,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Integration tests for PredictionRepositoryAdapter using a real H2 database.
+ * Integration tests for PredictionRepositoryAdapter using a real PostgreSQL database (Quarkus DevServices).
  * Each test is @Transactional so saves and reads share the same transaction.
  * em.flush() + em.clear() after writes ensures reads bypass the identity-map cache.
  */
@@ -57,7 +57,7 @@ class PredictionRepositoryAdapterIT {
     @Test
     @Transactional
     void findByMatchId_returnsAllPredictionsForMatch() {
-        String matchId = "match-db-multi-" + UUID.randomUUID();
+        String matchId = UUID.randomUUID().toString();
         Prediction p1 = prediction(matchId, "user-db-2");
         Prediction p2 = prediction(matchId, "user-db-3");
         repository.save(p1);

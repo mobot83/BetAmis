@@ -6,13 +6,15 @@ import au.com.dius.pact.provider.junit5.PactVerificationContext;
 import au.com.dius.pact.provider.junit5.PactVerificationInvocationContextProvider;
 import au.com.dius.pact.provider.junitsupport.Provider;
 import au.com.dius.pact.provider.junitsupport.loader.PactFolder;
-import com.betamis.prediction.event.PredictionSubmitted;
-import com.betamis.prediction.event.Score;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -45,23 +47,18 @@ class PredictionSubmittedPactProviderTest {
     /**
      * Produces a sample {@code prediction.submitted} message as prediction-service would.
      * The returned JSON is compared against the consumer contract's matching rules.
-     * Serialisation is delegated to Avro's built-in {@code toString()} to avoid
-     * manual string formatting and the JSON-injection risk it carries.
+     * Fields are serialised via Jackson with {@code occurredAt} as epoch milliseconds (long),
+     * matching the {@code timestamp-millis} Avro logical type expected by the consumer.
      */
     @PactVerifyProvider("a prediction submitted event")
-    String producePredictionSubmittedEvent() {
-        PredictionSubmitted event = PredictionSubmitted.newBuilder()
-                .setId(UUID.randomUUID().toString())
-                .setPredictionId(UUID.randomUUID().toString())
-                .setMatchId(UUID.randomUUID().toString())
-                .setUserId(UUID.randomUUID().toString())
-                .setScore(Score.newBuilder()
-                        .setHomeTeamScore(2)
-                        .setAwayTeamScore(1)
-                        .build())
-                .setOccurredAt(Instant.now())
-                .build();
-
-        return event.toString();
+    String producePredictionSubmittedEvent() throws JsonProcessingException {
+        Map<String, Object> event = new LinkedHashMap<>();
+        event.put("id", UUID.randomUUID().toString());
+        event.put("predictionId", UUID.randomUUID().toString());
+        event.put("matchId", UUID.randomUUID().toString());
+        event.put("userId", UUID.randomUUID().toString());
+        event.put("score", Map.of("homeTeamScore", 2, "awayTeamScore", 1));
+        event.put("occurredAt", Instant.now().toEpochMilli());
+        return new ObjectMapper().writeValueAsString(event);
     }
 }

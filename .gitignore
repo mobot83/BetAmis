@@ -28,7 +28,7 @@ replay_pid*
 *.iws
 *.iml
 *.ipr
-out/
+/out/
 
 # Claude AI
 .claude/
