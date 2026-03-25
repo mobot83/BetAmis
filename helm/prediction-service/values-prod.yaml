@@ -1,11 +1,10 @@
 image:
-  tag: 4ff9538f
+  tag: 346aa194
   repository: ghcr.io/mobot83/betamis/prediction-service
 replicaCount: 2
-
 ingress:
   enabled: true
-  host: api.betamis.example.com   # replace with real domain
+  host: api.betamis.example.com # replace with real domain
   tls: true
   issuer: letsencrypt-prod
 config:
