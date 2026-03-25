@@ -1,4 +1,16 @@
 apiVersion: v1
+kind: Secret
+metadata:
+  name: grafana-admin
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "betamis-infra.labels" . | nindent 4 }}
+type: Opaque
+stringData:
+  user: {{ .Values.grafana.admin.user | quote }}
+  password: {{ .Values.grafana.admin.password | quote }}
+---
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: grafana-datasources
@@ -9,8 +21,18 @@ data:
   datasources.yaml: |
     apiVersion: 1
     datasources:
+      - name: Prometheus
+        type: prometheus
+        uid: prometheus
+        access: proxy
+        url: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+        isDefault: false
+        jsonData:
+          timeInterval: 15s
+
       - name: Tempo
         type: tempo
+        uid: tempo
         access: proxy
         url: http://tempo.{{ .Release.Namespace }}.svc.cluster.local:3200
         isDefault: true
@@ -18,9 +40,49 @@ data:
           tracesToLogsV2:
             datasourceUid: ~  # set to Loki UID when Loki is deployed
           serviceMap:
-            datasourceUid: ~  # set to Prometheus UID when Prometheus is deployed
+            datasourceUid: prometheus
           nodeGraph:
             enabled: true
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-provisioner
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "betamis-infra.labels" . | nindent 4 }}
+data:
+  dashboards.yaml: |
+    apiVersion: 1
+    providers:
+      - name: betamis
+        orgId: 1
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 30
+        allowUiUpdates: false
+        folder: betamis
+        folderUid: betamis
+        options:
+          path: /var/lib/grafana/dashboards
+          foldersFromFilesStructure: false
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "betamis-infra.labels" . | nindent 4 }}
+data:
+  betamis-business.json: |
+    {{ .Files.Get "files/dashboards/betamis-business.json" | nindent 4 }}
+  betamis-technical.json: |
+    {{ .Files.Get "files/dashboards/betamis-technical.json" | nindent 4 }}
+  betamis-kafka.json: |
+    {{ .Files.Get "files/dashboards/betamis-kafka.json" | nindent 4 }}
+  betamis-jvm.json: |
+    {{ .Files.Get "files/dashboards/betamis-jvm.json" | nindent 4 }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -47,20 +109,36 @@ spec:
               name: http
           env:
             - name: GF_SECURITY_ADMIN_USER
-              value: {{ .Values.grafana.admin.user | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-admin
+                  key: user
             - name: GF_SECURITY_ADMIN_PASSWORD
-              value: {{ .Values.grafana.admin.password | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-admin
+                  key: password
             - name: GF_AUTH_ANONYMOUS_ENABLED
               value: "false"
           volumeMounts:
             - name: datasources
               mountPath: /etc/grafana/provisioning/datasources
+            - name: dashboard-provisioner
+              mountPath: /etc/grafana/provisioning/dashboards
+            - name: dashboards
+              mountPath: /var/lib/grafana/dashboards
           resources:
             {{- toYaml .Values.grafana.resources | nindent 12 }}
       volumes:
         - name: datasources
           configMap:
             name: grafana-datasources
+        - name: dashboard-provisioner
+          configMap:
+            name: grafana-dashboard-provisioner
+        - name: dashboards
+          configMap:
+            name: grafana-dashboards
 ---
 apiVersion: v1
 kind: Service
