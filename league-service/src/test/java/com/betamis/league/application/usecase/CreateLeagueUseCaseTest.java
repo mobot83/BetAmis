@@ -4,6 +4,7 @@ import com.betamis.league.domain.event.LeagueCreated;
 import com.betamis.league.domain.model.League;
 import com.betamis.league.domain.port.out.LeagueEventPublisher;
 import com.betamis.league.domain.port.out.LeagueRepository;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,13 +17,15 @@ class CreateLeagueUseCaseTest {
 
     private LeagueRepository repository;
     private LeagueEventPublisher publisher;
+    private SimpleMeterRegistry registry;
     private CreateLeagueUseCase useCase;
 
     @BeforeEach
     void setUp() {
         repository = mock(LeagueRepository.class);
         publisher = mock(LeagueEventPublisher.class);
-        useCase = new CreateLeagueUseCase(repository, publisher);
+        registry = new SimpleMeterRegistry();
+        useCase = new CreateLeagueUseCase(repository, publisher, registry);
     }
 
     @Test
@@ -49,6 +52,18 @@ class CreateLeagueUseCaseTest {
         // Events are consumed during create(); pollDomainEvents() must return empty afterwards
         assertTrue(league.pollDomainEvents().isEmpty());
         verify(publisher, times(1)).publish(any(LeagueCreated.class));
+    }
+
+    @Test
+    @DisplayName("betamis_leagues_created_total is pre-registered at 0 and increments per successful create()")
+    void shouldIncrementLeaguesCreatedCounter() {
+        assertEquals(0.0, registry.counter("betamis_leagues_created_total").count());
+
+        useCase.create("League A", "user-1");
+        assertEquals(1.0, registry.counter("betamis_leagues_created_total").count());
+
+        useCase.create("League B", "user-2");
+        assertEquals(2.0, registry.counter("betamis_leagues_created_total").count());
     }
 }
 

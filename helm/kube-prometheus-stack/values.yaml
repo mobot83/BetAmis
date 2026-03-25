@@ -1,0 +1,27 @@
+# kube-prometheus-stack base values.
+# Grafana is disabled — BetAmis already runs its own Grafana instance (betamis-infra chart).
+# Alertmanager is disabled — alerts are visible in the Prometheus UI; wire up a receiver when needed.
+
+grafana:
+  enabled: false
+
+alertmanager:
+  enabled: false
+
+# Allow Prometheus to discover ServiceMonitors and PrometheusRules in any namespace.
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelector: {}
+    serviceMonitorNamespaceSelector: {}
+    podMonitorSelector: {}
+    podMonitorNamespaceSelector: {}
+    ruleSelector: {}
+    ruleNamespaceSelector: {}
+    retention: 7d
+    resources:
+      requests:
+        memory: "400Mi"
+        cpu: "100m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"

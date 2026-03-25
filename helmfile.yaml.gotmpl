@@ -3,6 +3,8 @@ repositories:
     url: https://kubernetes.github.io/ingress-nginx
   - name: jetstack
     url: https://charts.jetstack.io
+  - name: prometheus-community
+    url: https://prometheus-community.github.io/helm-charts
 
 environments:
   dev:
@@ -50,6 +52,27 @@ releases:
     values:
       - ./helm/cert-issuer/values.yaml
       - ./helm/cert-issuer/values-{{ .Environment.Name }}.yaml
+
+  # ── Monitoring ──────────────────────────────────────────────────────────────
+  - name: kube-prometheus-stack
+    namespace: monitoring
+    createNamespace: true
+    chart: prometheus-community/kube-prometheus-stack
+    version: "67.9.0"
+    values:
+      - ./helm/kube-prometheus-stack/values.yaml
+      - ./helm/kube-prometheus-stack/values-{{ .Environment.Name }}.yaml
+
+  # ServiceMonitors and PrometheusRule (CRD instances — needs Prometheus Operator)
+  - name: prometheus
+    namespace: {{ .Values.appNamespace }}
+    createNamespace: true
+    chart: ./helm/prometheus
+    needs:
+      - monitoring/kube-prometheus-stack
+    values:
+      - ./helm/prometheus/values.yaml
+      - ./helm/prometheus/values-{{ .Environment.Name }}.yaml
 
   # ── Infrastructure ──────────────────────────────────────────────────────────
   - name: betamis-infra

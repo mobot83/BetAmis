@@ -9,6 +9,7 @@ import com.betamis.scoring.domain.port.out.RankingRepository;
 import com.betamis.scoring.domain.port.out.ScoringEventPublisher;
 import com.betamis.scoring.domain.port.out.ScoringResultRepository;
 import com.betamis.scoring.domain.port.out.StoredPredictionRepository;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ class ScoreMatchUseCaseMixedTest {
 
     @BeforeEach
     void setUp() {
-        useCase = new ScoreMatchUseCase(predictionRepository, scoringResultRepository, rankingRepository, eventPublisher, leagueMembershipRepository);
+        useCase = new ScoreMatchUseCase(predictionRepository, scoringResultRepository, rankingRepository, eventPublisher, leagueMembershipRepository, new SimpleMeterRegistry());
     }
 
     @Test

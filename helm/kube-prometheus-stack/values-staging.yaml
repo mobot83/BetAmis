@@ -1,0 +1,11 @@
+# Reduced resource footprint for kind-based staging clusters (mirrors dev).
+prometheus:
+  prometheusSpec:
+    retention: 24h
+    resources:
+      requests:
+        memory: "200Mi"
+        cpu: "50m"
+      limits:
+        memory: "400Mi"
+        cpu: "200m"
