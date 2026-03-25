@@ -15,6 +15,7 @@ config:
   KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry.betamis-infra.svc.cluster.local:8081
   JWT_PUBLIC_KEY_LOCATION: http://keycloak.betamis-infra.svc.cluster.local:8080/realms/betamis/protocol/openid-connect/certs
   JWT_ISSUER: http://keycloak.betamis-infra.svc.cluster.local:8080/realms/betamis
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.betamis-infra.svc.cluster.local:4317
 
 secret:
   create: true

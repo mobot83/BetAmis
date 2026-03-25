@@ -45,6 +45,7 @@ config:
   KAFKA_SCHEMA_REGISTRY_URL: ""
   REDIS_HOST: ""
   REDIS_PORT: "6379"
+  SMALLRYE_JWT_PATH_GROUPS: "realm_access/roles"
   OTEL_EXPORTER_OTLP_ENDPOINT: ""
 
 secret:
