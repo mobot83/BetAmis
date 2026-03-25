@@ -14,6 +14,7 @@ config:
   KAFKA_SCHEMA_REGISTRY_URL: ""
   JWT_PUBLIC_KEY_LOCATION: ""
   JWT_ISSUER: ""
+  OTEL_EXPORTER_OTLP_ENDPOINT: ""
 # In production, sensitive values must live in an externally-managed Secret
 # (e.g. sealed-secrets, external-secrets-operator, Vault).
 # Set create: false and point to the pre-existing Secret name.

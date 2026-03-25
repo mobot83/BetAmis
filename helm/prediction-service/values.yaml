@@ -44,6 +44,7 @@ config:
   KAFKA_SCHEMA_REGISTRY_URL: ""
   JWT_PUBLIC_KEY_LOCATION: ""
   JWT_ISSUER: ""
+  SMALLRYE_JWT_PATH_GROUPS: "realm_access/roles"
   OTEL_EXPORTER_OTLP_ENDPOINT: ""
 
 secret:
