@@ -9,6 +9,8 @@ import com.betamis.match.domain.port.in.SyncMatches;
 import com.betamis.match.domain.port.out.MatchDataProvider;
 import com.betamis.match.domain.port.out.MatchEventPublisher;
 import com.betamis.match.domain.port.out.MatchRepository;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
@@ -20,15 +22,18 @@ public class SyncMatchesUseCase implements SyncMatches {
     private final MatchDataProvider matchDataProvider;
     private final MatchRepository matchRepository;
     private final MatchEventPublisher eventPublisher;
+    private final Counter matchesSyncedCounter;
 
     public SyncMatchesUseCase(
             MatchDataProvider matchDataProvider,
             MatchRepository matchRepository,
-            MatchEventPublisher eventPublisher
+            MatchEventPublisher eventPublisher,
+            MeterRegistry registry
     ) {
         this.matchDataProvider = matchDataProvider;
         this.matchRepository = matchRepository;
         this.eventPublisher = eventPublisher;
+        this.matchesSyncedCounter = registry.counter("betamis_matches_synced_total");
     }
 
     @Override
@@ -54,6 +59,7 @@ public class SyncMatchesUseCase implements SyncMatches {
             // A match discovered for the first time is silently persisted regardless of status,
             // to avoid duplicate events if the service restarts mid-match.
             emitTransitionEvent(existing, newStatus, match);
+            matchesSyncedCounter.increment();
         }
     }
 

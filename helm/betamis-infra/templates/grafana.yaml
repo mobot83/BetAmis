@@ -16,9 +16,9 @@ data:
         isDefault: true
         jsonData:
           tracesToLogsV2:
-            datasourceUid: ""  # set to Loki UID when Loki is deployed
+            datasourceUid: ~  # set to Loki UID when Loki is deployed
           serviceMap:
-            datasourceUid: ""  # set to Prometheus UID when Prometheus is deployed
+            datasourceUid: ~  # set to Prometheus UID when Prometheus is deployed
           nodeGraph:
             enabled: true
 ---

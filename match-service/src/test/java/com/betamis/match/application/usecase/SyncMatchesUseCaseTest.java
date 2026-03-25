@@ -8,6 +8,7 @@ import com.betamis.match.domain.model.match.MatchStatus;
 import com.betamis.match.domain.port.out.MatchDataProvider;
 import com.betamis.match.domain.port.out.MatchEventPublisher;
 import com.betamis.match.domain.port.out.MatchRepository;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,11 +33,13 @@ class SyncMatchesUseCaseTest {
     @Mock MatchRepository matchRepository;
     @Mock MatchEventPublisher eventPublisher;
 
+    SimpleMeterRegistry registry;
     SyncMatchesUseCase useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new SyncMatchesUseCase(matchDataProvider, matchRepository, eventPublisher);
+        registry = new SimpleMeterRegistry();
+        useCase = new SyncMatchesUseCase(matchDataProvider, matchRepository, eventPublisher, registry);
     }
 
     @Test
@@ -173,6 +176,25 @@ class SyncMatchesUseCaseTest {
 
         assertThrows(RuntimeException.class, () -> useCase.syncByCompetition("PL"));
         verify(matchRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("betamis_matches_synced_total increments once per match processed, 0 on empty list")
+    void shouldIncrementMatchesSyncedCounterPerMatch() {
+        assertEquals(0.0, registry.counter("betamis_matches_synced_total").count());
+
+        when(matchDataProvider.getMatchesByCompetition("PL")).thenReturn(List.of());
+        useCase.syncByCompetition("PL");
+        assertEquals(0.0, registry.counter("betamis_matches_synced_total").count());
+
+        when(matchDataProvider.getMatchesByCompetition("PL")).thenReturn(List.of(
+                externalMatch(11L, "SCHEDULED", 0, 0),
+                externalMatch(12L, "SCHEDULED", 0, 0),
+                externalMatch(13L, "SCHEDULED", 0, 0)
+        ));
+        when(matchRepository.findByExternalId(anyLong())).thenReturn(Optional.empty());
+        useCase.syncByCompetition("PL");
+        assertEquals(3.0, registry.counter("betamis_matches_synced_total").count());
     }
 
     // --- helpers ---

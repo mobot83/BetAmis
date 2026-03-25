@@ -1,0 +1,20 @@
+{{- $services := list "league-service" "match-service" "prediction-service" "scoring-service" }}
+{{- range $services }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ . }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: {{ . }}
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: {{ . }}
+  endpoints:
+    - port: http
+      path: /q/metrics
+      interval: 30s
+{{- end }}

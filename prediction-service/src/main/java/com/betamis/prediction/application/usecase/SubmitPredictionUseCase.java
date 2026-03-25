@@ -7,6 +7,8 @@ import com.betamis.prediction.domain.model.score.Score;
 import com.betamis.prediction.domain.port.in.SubmitPrediction;
 import com.betamis.prediction.domain.port.out.EventPublisher;
 import com.betamis.prediction.domain.port.out.PredictionRepository;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -17,11 +19,15 @@ public class SubmitPredictionUseCase implements SubmitPrediction {
 
     private final PredictionRepository predictionRepository;
     private final EventPublisher eventPublisher;
+    private final Counter predictionsSubmittedCounter;
 
     @Inject
-    public SubmitPredictionUseCase(PredictionRepository predictionRepository, EventPublisher eventPublisher) {
+    public SubmitPredictionUseCase(PredictionRepository predictionRepository,
+                                   EventPublisher eventPublisher,
+                                   MeterRegistry registry) {
         this.predictionRepository = predictionRepository;
         this.eventPublisher = eventPublisher;
+        this.predictionsSubmittedCounter = registry.counter("betamis_predictions_submitted_total");
     }
 
     @Override
@@ -38,6 +44,7 @@ public class SubmitPredictionUseCase implements SubmitPrediction {
                 eventPublisher.publish(event);
             }
         });
+        predictionsSubmittedCounter.increment();
         return prediction.getId();
     }
 }

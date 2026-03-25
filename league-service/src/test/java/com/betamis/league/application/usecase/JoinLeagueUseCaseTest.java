@@ -9,6 +9,7 @@ import com.betamis.league.domain.model.League;
 import com.betamis.league.domain.model.Membership;
 import com.betamis.league.domain.port.out.LeagueEventPublisher;
 import com.betamis.league.domain.port.out.LeagueRepository;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,13 +26,15 @@ class JoinLeagueUseCaseTest {
 
     private LeagueRepository repository;
     private LeagueEventPublisher publisher;
+    private SimpleMeterRegistry registry;
     private JoinLeagueUseCase useCase;
 
     @BeforeEach
     void setUp() {
         repository = mock(LeagueRepository.class);
         publisher = mock(LeagueEventPublisher.class);
-        useCase = new JoinLeagueUseCase(repository, publisher);
+        registry = new SimpleMeterRegistry();
+        useCase = new JoinLeagueUseCase(repository, publisher, registry);
     }
 
     @Test
@@ -91,6 +94,27 @@ class JoinLeagueUseCaseTest {
                 () -> useCase.join("league-1", "user-1", inv.code()));
         verify(repository, never()).save(any());
         verify(publisher, never()).publish(any(MemberJoined.class));
+    }
+
+    @Test
+    @DisplayName("betamis_league_joins_total increments only on successful join, not on exceptions")
+    void shouldIncrementJoinsCounterOnlyOnSuccess() {
+        assertEquals(0.0, registry.counter("betamis_league_joins_total").count());
+
+        Invitation inv = Invitation.generate(Instant.now());
+        League league = League.reconstitute("league-1", "Test", "user-1",
+                List.of(new Membership("user-1", Instant.now())),
+                List.of(inv),
+                Instant.now());
+        when(repository.findById("league-1")).thenReturn(Optional.of(league));
+        when(repository.findById("missing")).thenReturn(Optional.empty());
+
+        assertThrows(LeagueNotFoundException.class,
+                () -> useCase.join("missing", "user-2", "XXXXXX"));
+        assertEquals(0.0, registry.counter("betamis_league_joins_total").count());
+
+        useCase.join("league-1", "user-2", inv.code());
+        assertEquals(1.0, registry.counter("betamis_league_joins_total").count());
     }
 }
 

@@ -7,6 +7,7 @@ import com.betamis.prediction.domain.model.prediction.PredictionStatus;
 import com.betamis.prediction.domain.model.score.Score;
 import com.betamis.prediction.domain.port.out.EventPublisher;
 import com.betamis.prediction.domain.port.out.PredictionRepository;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,11 +30,13 @@ class ClosePredictionUseCaseTest {
     @Mock
     EventPublisher eventPublisher;
 
+    SimpleMeterRegistry registry;
     ClosePredictionUseCase useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new ClosePredictionUseCase(repository, eventPublisher);
+        registry = new SimpleMeterRegistry();
+        useCase = new ClosePredictionUseCase(repository, eventPublisher, registry);
     }
 
     @Test
@@ -72,6 +75,20 @@ class ClosePredictionUseCaseTest {
 
         verify(repository, never()).update(any());
         verify(eventPublisher).publish(argThat((PredictionClosed e) -> "match-empty".equals(e.matchId())));
+    }
+
+    @Test
+    void counter_increments_once_per_close_call_regardless_of_prediction_state() {
+        assertEquals(0.0, registry.counter("betamis_predictions_closed_total").count());
+
+        when(repository.findByMatchId("match-1")).thenReturn(List.of());
+        useCase.close("match-1");
+        assertEquals(1.0, registry.counter("betamis_predictions_closed_total").count());
+
+        when(repository.findByMatchId("match-2")).thenReturn(
+                List.of(submittedPrediction("pred-1", "match-2", "user-1")));
+        useCase.close("match-2");
+        assertEquals(2.0, registry.counter("betamis_predictions_closed_total").count());
     }
 
     private Prediction submittedPrediction(String id, String matchId, String userId) {

@@ -1,0 +1,3 @@
+# Default values — overridden per environment.
+# kube-prometheus-stack is deployed as a separate helmfile release;
+# this chart only contains ServiceMonitors and PrometheusRule CRD instances.

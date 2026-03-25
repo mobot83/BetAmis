@@ -14,6 +14,7 @@ import com.betamis.scoring.domain.port.out.RankingRepository;
 import com.betamis.scoring.domain.port.out.ScoringEventPublisher;
 import com.betamis.scoring.domain.port.out.ScoringResultRepository;
 import com.betamis.scoring.domain.port.out.StoredPredictionRepository;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,7 +49,7 @@ class ScoringIntegrationTest {
     @BeforeEach
     void setUp() {
         StorePredictionUseCase storePrediction = new StorePredictionUseCase(predictionRepository);
-        ScoreMatchUseCase scoreMatch = new ScoreMatchUseCase(predictionRepository, scoringResultRepository, rankingRepository, eventPublisher, leagueMembershipRepository);
+        ScoreMatchUseCase scoreMatch = new ScoreMatchUseCase(predictionRepository, scoringResultRepository, rankingRepository, eventPublisher, leagueMembershipRepository, new SimpleMeterRegistry());
         predictionConsumer = new KafkaPredictionConsumer(storePrediction);
         matchConsumer = new KafkaMatchFinishedConsumer(scoreMatch);
     }
