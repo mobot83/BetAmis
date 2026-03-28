@@ -2,13 +2,16 @@ package com.betamis.prediction.interfaces.rest.dto;
 
 import com.betamis.prediction.domain.model.prediction.Prediction;
 
+import java.time.Instant;
+
 public record PredictionResponse(
         String id,
         String matchId,
         String userId,
-        int homeScore,
-        int awayScore,
-        String status
+        int homeTeamScore,
+        int awayTeamScore,
+        String status,
+        Instant submittedAt
 ) {
     public static PredictionResponse from(Prediction prediction) {
         return new PredictionResponse(
@@ -17,7 +20,8 @@ public record PredictionResponse(
                 prediction.getUserId(),
                 prediction.getScore().homeTeamScore(),
                 prediction.getScore().awayTeamScore(),
-                prediction.getStatus().name()
+                prediction.getStatus().name(),
+                prediction.getSubmittedAt()
         );
     }
 }

@@ -1,0 +1,141 @@
+{
+  "consumer": {
+    "name": "frontend"
+  },
+  "interactions": [
+    {
+      "description": "a request for the current user's prediction for a match",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "user user-pact has a prediction for match match-pact-1"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/predictions",
+        "query": {
+          "matchId": ["match-pact-1"]
+        }
+      },
+      "response": {
+        "body": {
+          "awayTeamScore": 1,
+          "homeTeamScore": 2,
+          "id": "pred-uuid-1",
+          "matchId": "match-pact-1",
+          "status": "SUBMITTED",
+          "submittedAt": "2026-07-09T14:30:00Z",
+          "userId": "user-pact"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.awayTeamScore": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.homeTeamScore": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.matchId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.submittedAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.userId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json.*"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request for the current user's prediction when none exists",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "user user-pact has no prediction for match match-pact-none"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/predictions",
+        "query": {
+          "matchId": ["match-pact-none"]
+        }
+      },
+      "response": {
+        "status": 404
+      },
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.6.16"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "prediction-service"
+  }
+}

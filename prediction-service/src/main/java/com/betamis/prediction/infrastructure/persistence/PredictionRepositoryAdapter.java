@@ -9,6 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 public class PredictionRepositoryAdapter implements PredictionRepository {
@@ -34,6 +35,14 @@ public class PredictionRepositoryAdapter implements PredictionRepository {
                 .firstResultOptional()
                 .map(this::toDomain)
                 .orElse(null);
+    }
+
+    @Override
+    @Transactional
+    public Optional<Prediction> findByUserIdAndMatchId(String userId, String matchId) {
+        return PredictionEntity.<PredictionEntity>find("userId = ?1 and matchId = ?2", userId, matchId)
+                .firstResultOptional()
+                .map(this::toDomain);
     }
 
     @Override

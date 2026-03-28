@@ -11,7 +11,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 /**
- * REST integration tests for POST /predictions and PATCH /predictions/{id}.
+ * REST integration tests for GET/POST /predictions and PATCH /predictions/{id}.
  * Uses PostgreSQL DevServices via Quarkus and @TestSecurity to bypass JWT validation.
  */
 @QuarkusTest
@@ -130,8 +130,8 @@ class PredictionResourceIT {
                 .patch("/predictions/" + predictionId)
         .then()
                 .statusCode(200)
-                .body("homeScore", is(3))
-                .body("awayScore", is(2))
+                .body("homeTeamScore", is(3))
+                .body("awayTeamScore", is(2))
                 .body("status", is("SUBMITTED"))
                 .body("id", is(predictionId));
     }
@@ -224,6 +224,62 @@ class PredictionResourceIT {
                         """)
         .when()
                 .patch("/predictions/some-id")
+        .then()
+                .statusCode(400);
+    }
+
+    // ── GET /predictions?matchId={matchId} ────────────────────────────────────
+
+    @Test
+    @TestSecurity(user = "user-get-ok", roles = "betamis-user")
+    void getPrediction_returns200WithPrediction() {
+        given()
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"matchId":"match-get-1","homeScore":2,"awayScore":1,"kickOffTime":"%s"}
+                        """.formatted(FUTURE_KICK_OFF))
+                .post("/predictions")
+                .then().statusCode(201);
+
+        given()
+        .when()
+                .get("/predictions?matchId=match-get-1")
+        .then()
+                .statusCode(200)
+                .body("matchId", is("match-get-1"))
+                .body("userId", is("user-get-ok"))
+                .body("homeTeamScore", is(2))
+                .body("awayTeamScore", is(1))
+                .body("status", is("SUBMITTED"))
+                .body("id", notNullValue())
+                .body("submittedAt", notNullValue());
+    }
+
+    @Test
+    @TestSecurity(user = "user-get-nf", roles = "betamis-user")
+    void getPrediction_notFound_returns404() {
+        given()
+        .when()
+                .get("/predictions?matchId=match-get-no-prediction")
+        .then()
+                .statusCode(404);
+    }
+
+    @Test
+    void getPrediction_withoutAuth_returns401() {
+        given()
+        .when()
+                .get("/predictions?matchId=match-get-unauth")
+        .then()
+                .statusCode(401);
+    }
+
+    @Test
+    @TestSecurity(user = "user-get-nmi", roles = "betamis-user")
+    void getPrediction_missingMatchId_returns400() {
+        given()
+        .when()
+                .get("/predictions")
         .then()
                 .statusCode(400);
     }
