@@ -4,6 +4,7 @@ import com.betamis.notification.domain.model.NotificationPreference;
 import com.betamis.notification.domain.port.out.NotificationPreferenceRepository;
 import com.betamis.notification.infrastructure.persistence.entity.NotificationPreferenceEntity;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,6 +13,7 @@ import java.util.Optional;
 public class NotificationPreferenceRepositoryAdapter implements NotificationPreferenceRepository {
 
     @Override
+    @Transactional
     public void save(NotificationPreference pref) {
         NotificationPreferenceEntity entity = NotificationPreferenceEntity
                 .<NotificationPreferenceEntity>find("userId", pref.getUserId())

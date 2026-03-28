@@ -1,10 +1,12 @@
 package com.betamis.match.infrastructure.persistence;
 
 import com.betamis.match.domain.model.match.Match;
+import com.betamis.match.domain.model.match.MatchStatus;
 import com.betamis.match.domain.port.out.MatchRepository;
 import com.betamis.match.infrastructure.persistence.entity.MatchEntity;
 import jakarta.enterprise.context.ApplicationScoped;
 
+import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -34,6 +36,16 @@ public class MatchRepositoryAdapter implements MatchRepository {
         return MatchEntity.<MatchEntity>find("externalId", externalId)
                 .firstResultOptional()
                 .map(MatchRepositoryAdapter::toDomain);
+    }
+
+    @Override
+    public List<Match> findAll(Optional<MatchStatus> status) {
+        List<MatchEntity> entities = status
+                .map(s -> MatchEntity.<MatchEntity>list(
+                        "status = ?1 ORDER BY kickoffAt ASC NULLS LAST", s))
+                .orElseGet(() -> MatchEntity.list(
+                        "FROM MatchEntity ORDER BY kickoffAt ASC NULLS LAST"));
+        return entities.stream().map(MatchRepositoryAdapter::toDomain).toList();
     }
 
     private static Match toDomain(MatchEntity e) {

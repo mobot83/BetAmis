@@ -4,6 +4,7 @@ import com.betamis.notification.domain.model.ScheduledNotification;
 import com.betamis.notification.domain.port.out.ScheduledNotificationRepository;
 import com.betamis.notification.infrastructure.persistence.entity.ScheduledNotificationEntity;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
 public class ScheduledNotificationRepositoryAdapter implements ScheduledNotificationRepository {
 
     @Override
+    @Transactional
     public void save(ScheduledNotification notification) {
         ScheduledNotificationEntity entity = new ScheduledNotificationEntity();
         entity.matchId = notification.getMatchId();
@@ -33,6 +35,7 @@ public class ScheduledNotificationRepositoryAdapter implements ScheduledNotifica
     }
 
     @Override
+    @Transactional
     public void markSent(Long id) {
         ScheduledNotificationEntity entity = ScheduledNotificationEntity.findById(id);
         if (entity != null) {
