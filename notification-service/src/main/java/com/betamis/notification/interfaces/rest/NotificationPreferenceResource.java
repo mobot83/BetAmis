@@ -6,7 +6,6 @@ import com.betamis.notification.interfaces.rest.dto.PreferenceRequest;
 import com.betamis.notification.interfaces.rest.dto.PreferenceResponse;
 import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.RolesAllowed;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PUT;
@@ -26,12 +25,11 @@ public class NotificationPreferenceResource {
     private static final String USER_ROLE = "betamis-user";
 
     private final UpdatePreferences updatePreferences;
+    private final JsonWebToken jwt;
 
-    @Inject
-    JsonWebToken jwt;
-
-    public NotificationPreferenceResource(UpdatePreferences updatePreferences) {
+    public NotificationPreferenceResource(UpdatePreferences updatePreferences, JsonWebToken jwt) {
         this.updatePreferences = updatePreferences;
+        this.jwt = jwt;
     }
 
     @GET

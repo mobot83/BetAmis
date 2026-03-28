@@ -36,14 +36,20 @@ public class SendDueNotificationsUseCase implements SendDueNotifications {
     @Transactional
     public void sendDue() {
         List<ScheduledNotification> due = scheduledRepo.findDue(Instant.now());
+        if (due.isEmpty()) return;
+
+        List<NotificationPreference> emailRecipients = preferenceRepo.findAllEmailEnabled();
+        List<NotificationPreference> pushRecipients = preferenceRepo.findAllWebPushEnabled();
+
         for (ScheduledNotification notification : due) {
-            sendToAllUsers(notification);
+            sendToAllUsers(notification, emailRecipients, pushRecipients);
             scheduledRepo.markSent(notification.getId());
         }
     }
 
-    private void sendToAllUsers(ScheduledNotification notification) {
-        List<NotificationPreference> emailRecipients = preferenceRepo.findAllEmailEnabled();
+    private void sendToAllUsers(ScheduledNotification notification,
+                                List<NotificationPreference> emailRecipients,
+                                List<NotificationPreference> pushRecipients) {
         for (NotificationPreference pref : emailRecipients) {
             if (pref.getEmail() == null) continue;
             try {
@@ -53,7 +59,6 @@ public class SendDueNotificationsUseCase implements SendDueNotifications {
             }
         }
 
-        List<NotificationPreference> pushRecipients = preferenceRepo.findAllWebPushEnabled();
         for (NotificationPreference pref : pushRecipients) {
             if (pref.getPushSubscriptionJson() == null) continue;
             try {
