@@ -1,6 +1,7 @@
 package com.betamis.match.application.usecase;
 
 import com.betamis.match.domain.event.MatchFinished;
+import com.betamis.match.domain.event.MatchScheduled;
 import com.betamis.match.domain.event.MatchStarted;
 import com.betamis.match.domain.model.match.ExternalMatch;
 import com.betamis.match.domain.model.match.Match;
@@ -19,6 +20,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -63,9 +65,31 @@ class SyncMatchesUseCaseTest {
     }
 
     @Test
+    @DisplayName("Should emit MatchScheduled when a new PLANNED match with kickoff time is discovered")
+    void shouldEmitMatchScheduledForNewPlannedMatch() {
+        Instant kickoff = Instant.parse("2026-04-01T20:00:00Z");
+        when(matchDataProvider.getMatchesByCompetition("PL"))
+                .thenReturn(List.of(externalMatchWithKickoff(11112L, "SCHEDULED", 0, 0, kickoff)));
+        when(matchRepository.findByExternalId(11112L)).thenReturn(Optional.empty());
+
+        Instant before = Instant.now();
+        useCase.syncByCompetition("PL");
+        Instant after = Instant.now();
+
+        ArgumentCaptor<MatchScheduled> captor = ArgumentCaptor.forClass(MatchScheduled.class);
+        verify(eventPublisher).publish(captor.capture());
+        verify(eventPublisher, never()).publish(any(MatchStarted.class));
+        verify(eventPublisher, never()).publish(any(MatchFinished.class));
+        MatchScheduled event = captor.getValue();
+        assertEquals(kickoff, event.kickoffAt());
+        assertFalse(event.occurredAt().isBefore(before));
+        assertFalse(event.occurredAt().isAfter(after));
+    }
+
+    @Test
     @DisplayName("Should update existing match with new score and status")
     void shouldUpdateExistingMatch() {
-        Match existing = Match.fromExternal(22222L, "1", "2", 0, 0, MatchStatus.PLANNED);
+        Match existing = Match.fromExternal(22222L, "1", "2", 0, 0, MatchStatus.PLANNED, null);
         when(matchDataProvider.getMatchesByCompetition("PL"))
                 .thenReturn(List.of(externalMatch(22222L, "FINISHED", 2, 1)));
         when(matchRepository.findByExternalId(22222L)).thenReturn(Optional.of(existing));
@@ -84,7 +108,7 @@ class SyncMatchesUseCaseTest {
     @Test
     @DisplayName("Should emit MatchStarted when match transitions from PLANNED to STARTED")
     void shouldEmitMatchStartedOnTransition() {
-        Match existing = Match.fromExternal(44444L, "1", "2", 0, 0, MatchStatus.PLANNED);
+        Match existing = Match.fromExternal(44444L, "1", "2", 0, 0, MatchStatus.PLANNED, null);
         when(matchDataProvider.getMatchesByCompetition("PL"))
                 .thenReturn(List.of(externalMatch(44444L, "IN_PLAY", 0, 0)));
         when(matchRepository.findByExternalId(44444L)).thenReturn(Optional.of(existing));
@@ -98,7 +122,7 @@ class SyncMatchesUseCaseTest {
     @Test
     @DisplayName("Should emit MatchFinished when match transitions from STARTED to FINISHED")
     void shouldEmitMatchFinishedOnTransition() {
-        Match existing = Match.fromExternal(55555L, "1", "2", 1, 0, MatchStatus.STARTED);
+        Match existing = Match.fromExternal(55555L, "1", "2", 1, 0, MatchStatus.STARTED, null);
         when(matchDataProvider.getMatchesByCompetition("PL"))
                 .thenReturn(List.of(externalMatch(55555L, "FINISHED", 2, 1)));
         when(matchRepository.findByExternalId(55555L)).thenReturn(Optional.of(existing));
@@ -112,7 +136,7 @@ class SyncMatchesUseCaseTest {
     @Test
     @DisplayName("Should not emit any event when status has not changed")
     void shouldNotEmitEventWhenStatusUnchanged() {
-        Match existing = Match.fromExternal(66666L, "1", "2", 1, 0, MatchStatus.STARTED);
+        Match existing = Match.fromExternal(66666L, "1", "2", 1, 0, MatchStatus.STARTED, null);
         when(matchDataProvider.getMatchesByCompetition("PL"))
                 .thenReturn(List.of(externalMatch(66666L, "IN_PLAY", 2, 0)));
         when(matchRepository.findByExternalId(66666L)).thenReturn(Optional.of(existing));
@@ -123,8 +147,8 @@ class SyncMatchesUseCaseTest {
     }
 
     @Test
-    @DisplayName("Should not emit any event for a newly created match")
-    void shouldNotEmitEventForNewMatch() {
+    @DisplayName("Should not emit any event for a newly discovered non-PLANNED match")
+    void shouldNotEmitEventForNewNonPlannedMatch() {
         when(matchDataProvider.getMatchesByCompetition("PL"))
                 .thenReturn(List.of(externalMatch(77777L, "IN_PLAY", 1, 0)));
         when(matchRepository.findByExternalId(77777L)).thenReturn(Optional.empty());
@@ -200,6 +224,10 @@ class SyncMatchesUseCaseTest {
     // --- helpers ---
 
     private static ExternalMatch externalMatch(long id, String status, int homeScore, int awayScore) {
-        return new ExternalMatch(id, status, "1", "2", homeScore, awayScore);
+        return new ExternalMatch(id, status, "1", "2", homeScore, awayScore, null);
+    }
+
+    private static ExternalMatch externalMatchWithKickoff(long id, String status, int homeScore, int awayScore, Instant kickoffAt) {
+        return new ExternalMatch(id, status, "1", "2", homeScore, awayScore, kickoffAt);
     }
 }

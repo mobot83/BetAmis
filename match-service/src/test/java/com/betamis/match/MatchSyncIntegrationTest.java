@@ -1,6 +1,7 @@
 package com.betamis.match;
 
 import com.betamis.match.domain.event.MatchFinished;
+import com.betamis.match.domain.event.MatchScheduled;
 import com.betamis.match.domain.event.MatchStarted;
 import com.betamis.match.domain.model.match.MatchStatus;
 import com.betamis.match.domain.port.in.SyncMatches;
@@ -52,7 +53,9 @@ class MatchSyncIntegrationTest {
         assertEquals(MatchStatus.PLANNED, found.get().getStatus());
         assertEquals("1", found.get().getHomeTeamId());
         assertEquals("2", found.get().getAwayTeamId());
-        verifyNoInteractions(eventPublisher);
+        verify(eventPublisher).publish(any(MatchScheduled.class));
+        verify(eventPublisher, never()).publish(any(MatchStarted.class));
+        verify(eventPublisher, never()).publish(any(MatchFinished.class));
     }
 
     @Test
@@ -88,6 +91,7 @@ class MatchSyncIntegrationTest {
     void shouldEmitMatchStartedEvent() {
         stubMatches(55505L, "SCHEDULED", null, null);
         syncMatches.syncByCompetition("PL");
+        clearInvocations(eventPublisher);
 
         wireMock.resetAll();
         stubMatches(55505L, "IN_PLAY", 0, 0);
@@ -125,6 +129,7 @@ class MatchSyncIntegrationTest {
     void shouldUpdateMatchAndEmitFinishedEvent() {
         stubMatches(55504L, "SCHEDULED", null, null);
         syncMatches.syncByCompetition("PL");
+        clearInvocations(eventPublisher);
 
         wireMock.resetAll();
         stubMatches(55504L, "FINISHED", 2, 0);

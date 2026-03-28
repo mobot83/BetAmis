@@ -1,6 +1,7 @@
 package com.betamis.match.application.usecase;
 
 import com.betamis.match.domain.event.MatchFinished;
+import com.betamis.match.domain.event.MatchScheduled;
 import com.betamis.match.domain.event.MatchStarted;
 import com.betamis.match.domain.model.match.ExternalMatch;
 import com.betamis.match.domain.model.match.Match;
@@ -14,6 +15,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
+import java.time.Instant;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -39,31 +41,38 @@ public class SyncMatchesUseCase implements SyncMatches {
     @Override
     @Transactional
     public void syncByCompetition(String competitionId) {
+        Instant now = Instant.now();
         for (ExternalMatch external : matchDataProvider.getMatchesByCompetition(competitionId)) {
             Optional<Match> existing = matchRepository.findByExternalId(external.externalId());
             MatchStatus newStatus = toStatus(external.status());
 
             Match match = existing
-                    .map(m -> m.withUpdate(external.homeScore(), external.awayScore(), newStatus))
+                    .map(m -> m.withUpdate(external.homeScore(), external.awayScore(), newStatus, external.kickoffAt()))
                     .orElseGet(() -> Match.fromExternal(
                             external.externalId(),
                             external.homeTeamId(),
                             external.awayTeamId(),
                             external.homeScore(),
                             external.awayScore(),
-                            newStatus
+                            newStatus,
+                            external.kickoffAt()
                     ));
 
             matchRepository.save(match);
-            // Events are only emitted on status transitions for existing matches.
-            // A match discovered for the first time is silently persisted regardless of status,
-            // to avoid duplicate events if the service restarts mid-match.
-            emitTransitionEvent(existing, newStatus, match);
+            emitEvents(existing, newStatus, match, now);
             matchesSyncedCounter.increment();
         }
     }
 
-    private void emitTransitionEvent(Optional<Match> existing, MatchStatus newStatus, Match match) {
+    private void emitEvents(Optional<Match> existing, MatchStatus newStatus, Match match, Instant now) {
+        if (existing.isEmpty() && newStatus == MatchStatus.PLANNED) {
+            // First discovery of a planned match — notify the notification-service
+            match.getKickoffAt().ifPresent(kickoffAt ->
+                    eventPublisher.publish(MatchScheduled.of(
+                            match.getId(), match.getHomeTeamId(), match.getAwayTeamId(), kickoffAt, now)));
+            return;
+        }
+        // Events are only emitted on status transitions for existing matches.
         existing.ifPresent(prev -> {
             if (prev.getStatus() == newStatus) return;
             if (newStatus == MatchStatus.STARTED) {

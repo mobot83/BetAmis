@@ -24,6 +24,7 @@ public class MatchRepositoryAdapter implements MatchRepository {
         entity.homeTeamScore = match.getHomeTeamScore();
         entity.awayTeamScore = match.getAwayTeamScore();
         entity.status = match.getStatus();
+        entity.kickoffAt = match.getKickoffAt().orElse(null);
 
         entity.persist();
     }
@@ -43,7 +44,8 @@ public class MatchRepositoryAdapter implements MatchRepository {
                 e.awayTeamId,
                 e.homeTeamScore,
                 e.awayTeamScore,
-                e.status
+                e.status,
+                e.kickoffAt
         );
     }
 }

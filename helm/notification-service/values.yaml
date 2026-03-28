@@ -1,0 +1,61 @@
+image:
+  repository: betamis/notification-service
+  tag: dev
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+service:
+  port: 8084
+
+healthPath: /q/health/ready
+livenessPath: /q/health/live
+
+ingress:
+  enabled: false
+  host: ""
+  paths:
+    - "/api/notifications(/|$)(.*)"
+  rewriteTarget: "/notifications/$2"
+  tls: false
+  tlsSecretName: ""
+  issuer: betamis-selfsigned
+  annotations: {}
+
+hpa:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 4
+  targetCPUUtilizationPercentage: 70
+  scaleDownStabilizationSeconds: 60
+
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+config:
+  DB_HOST: ""
+  DB_PORT: "5432"
+  KAFKA_BOOTSTRAP_SERVERS: ""
+  KAFKA_SCHEMA_REGISTRY_URL: ""
+  JWT_PUBLIC_KEY_LOCATION: ""
+  JWT_ISSUER: ""
+  SMALLRYE_JWT_PATH_GROUPS: "realm_access/roles"
+  OTEL_EXPORTER_OTLP_ENDPOINT: ""
+  SMTP_HOST: "smtp.sendgrid.net"
+  SMTP_PORT: "587"
+
+secret:
+  create: true
+  existingSecret: ""
+  data:
+    DB_USERNAME: betamis
+    DB_PASSWORD: ""
+    SMTP_USERNAME: apikey
+    SMTP_PASSWORD: ""
+    VAPID_PUBLIC_KEY: ""
+    VAPID_PRIVATE_KEY: ""
