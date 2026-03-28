@@ -1,5 +1,5 @@
 image:
-  tag: 54de8e6d
+  tag: b8e76efd
   repository: ghcr.io/mobot83/betamis/match-service
 replicaCount: 2
 ingress:
