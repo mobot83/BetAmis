@@ -46,6 +46,8 @@ config:
   JWT_ISSUER: ""
   SMALLRYE_JWT_PATH_GROUPS: "realm_access/roles"
   OTEL_EXPORTER_OTLP_ENDPOINT: ""
+  REDIS_HOST: ""
+  REDIS_PORT: "6379"
 
 secret:
   create: true
