@@ -50,7 +50,11 @@ public class PredictionRepositoryAdapter implements PredictionRepository {
     public void update(Prediction prediction) {
         PredictionEntity.<PredictionEntity>find("predictionId", prediction.getId())
                 .firstResultOptional()
-                .ifPresent(entity -> entity.status = prediction.getStatus().name());
+                .ifPresent(entity -> {
+                    entity.homeScore = prediction.getScore().homeTeamScore();
+                    entity.awayScore = prediction.getScore().awayTeamScore();
+                    entity.status = prediction.getStatus().name();
+                });
     }
 
     @Override
