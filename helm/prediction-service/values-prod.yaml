@@ -1,5 +1,5 @@
 image:
-  tag: 54de8e6d
+  tag: edf4d843
   repository: ghcr.io/mobot83/betamis/prediction-service
 replicaCount: 2
 ingress:
