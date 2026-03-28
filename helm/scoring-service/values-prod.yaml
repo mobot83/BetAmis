@@ -1,5 +1,5 @@
 image:
-  tag: 9427d917
+  tag: 54de8e6d
   repository: ghcr.io/mobot83/betamis/scoring-service
 replicaCount: 2
 ingress:
