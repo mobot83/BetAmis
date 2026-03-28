@@ -1,6 +1,7 @@
 package com.betamis.prediction.infrastructure.sse;
 
 import com.betamis.prediction.domain.model.ranking.RankingEntry;
+import io.smallrye.mutiny.Multi;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,13 +21,17 @@ class RankingBroadcasterTest {
         broadcaster = new RankingBroadcaster();
     }
 
+    private Multi<RankingEntry> stream(String leagueId) {
+        return Multi.createFrom().publisher(broadcaster.stream(leagueId));
+    }
+
     @Test
     @DisplayName("Events published before any subscription are not delivered")
     void publishBeforeSubscription_notReceived() {
         broadcaster.publish("league-1", new RankingEntry(1, "user-a", 10L));
 
         List<RankingEntry> received = new ArrayList<>();
-        broadcaster.stream("league-1").subscribe().with(received::add);
+        stream("league-1").subscribe().with(received::add);
 
         assertTrue(received.isEmpty());
     }
@@ -35,7 +40,7 @@ class RankingBroadcasterTest {
     @DisplayName("Events published after subscription are delivered to the subscriber")
     void publishAfterSubscription_received() {
         List<RankingEntry> received = new ArrayList<>();
-        broadcaster.stream("league-1").subscribe().with(received::add);
+        stream("league-1").subscribe().with(received::add);
 
         broadcaster.publish("league-1", new RankingEntry(1, "user-a", 10L));
 
@@ -50,8 +55,8 @@ class RankingBroadcasterTest {
         List<RankingEntry> league1 = new ArrayList<>();
         List<RankingEntry> league2 = new ArrayList<>();
 
-        broadcaster.stream("league-1").subscribe().with(league1::add);
-        broadcaster.stream("league-2").subscribe().with(league2::add);
+        stream("league-1").subscribe().with(league1::add);
+        stream("league-2").subscribe().with(league2::add);
 
         broadcaster.publish("league-1", new RankingEntry(1, "user-a", 10L));
 
@@ -65,8 +70,8 @@ class RankingBroadcasterTest {
         List<RankingEntry> sub1 = new ArrayList<>();
         List<RankingEntry> sub2 = new ArrayList<>();
 
-        broadcaster.stream("league-1").subscribe().with(sub1::add);
-        broadcaster.stream("league-1").subscribe().with(sub2::add);
+        stream("league-1").subscribe().with(sub1::add);
+        stream("league-1").subscribe().with(sub2::add);
 
         broadcaster.publish("league-1", new RankingEntry(1, "user-a", 10L));
 

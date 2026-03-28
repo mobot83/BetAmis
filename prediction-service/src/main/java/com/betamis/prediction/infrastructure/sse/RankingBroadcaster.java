@@ -4,9 +4,9 @@ import com.betamis.prediction.domain.model.ranking.RankingEntry;
 import com.betamis.prediction.domain.port.in.StreamLeagueRanking;
 import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
 import jakarta.enterprise.context.ApplicationScoped;
-import org.reactivestreams.Publisher;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Flow;
 
 /**
  * In-memory broadcaster that fans out RankingEntry events to all SSE subscribers
@@ -29,7 +29,7 @@ public class RankingBroadcaster implements StreamLeagueRanking {
     }
 
     @Override
-    public Publisher<RankingEntry> stream(String leagueId) {
+    public Flow.Publisher<RankingEntry> stream(String leagueId) {
         return processors.computeIfAbsent(leagueId, k -> BroadcastProcessor.create());
     }
 }
