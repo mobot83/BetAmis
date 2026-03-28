@@ -2,6 +2,7 @@ package com.betamis.prediction.domain.model.prediction;
 
 import com.betamis.prediction.domain.event.PredictionSubmitted;
 import com.betamis.prediction.domain.exception.KickOffAlreadyPassedException;
+import com.betamis.prediction.domain.exception.MatchAlreadyStartedException;
 import com.betamis.prediction.domain.exception.PredictionAlreadyClosedException;
 import com.betamis.prediction.domain.model.score.Score;
 
@@ -99,6 +100,18 @@ public class Prediction {
         List<Object> events = new ArrayList<>(domainEvents);
         domainEvents.clear();
         return events;
+    }
+
+    public void update(Score newScore, Instant kickoffAt, Instant now) {
+        if (this.status == PredictionStatus.CLOSED) {
+            throw new MatchAlreadyStartedException(
+                    "Cannot update prediction %s: match has already started".formatted(id));
+        }
+        if (!now.isBefore(kickoffAt)) {
+            throw new MatchAlreadyStartedException(
+                    "Cannot update prediction %s: kick-off time has passed".formatted(id));
+        }
+        this.score = newScore;
     }
 
     public static Prediction submit(String matchId, String userId, Score score, Instant kickOffTime) {
