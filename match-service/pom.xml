@@ -196,6 +196,7 @@
                     <subjects>
                         <prediction.submitted-value>${project.basedir}/../schemas/avro/prediction/PredictionSubmitted.avsc</prediction.submitted-value>
                         <prediction.closed-value>${project.basedir}/../schemas/avro/prediction/PredictionClosed.avsc</prediction.closed-value>
+                        <match.scheduled-value>${project.basedir}/../schemas/avro/match/MatchScheduled.avsc</match.scheduled-value>
                         <match.started-value>${project.basedir}/../schemas/avro/match/MatchStarted.avsc</match.started-value>
                         <match.finished-value>${project.basedir}/../schemas/avro/match/MatchFinished.avsc</match.finished-value>
                     </subjects>

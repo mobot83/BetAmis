@@ -12,7 +12,7 @@ class MatchTest {
     @Test
     @DisplayName("Should create a valid Match")
     void createMatch() {
-        Match match = new Match("match-1", 99L, "team-1", "team-2", 2, 1, MatchStatus.PLANNED);
+        Match match = new Match("match-1", 99L, "team-1", "team-2", 2, 1, MatchStatus.PLANNED, null);
 
         assertEquals("match-1", match.getId());
         assertEquals(Optional.of(99L), match.getExternalId());
@@ -26,106 +26,106 @@ class MatchTest {
     @Test
     @DisplayName("Should return empty Optional when externalId is null")
     void createMatchWithNullExternalId() {
-        Match match = new Match("match-1", null, "team-1", "team-2", 0, 0, MatchStatus.PLANNED);
+        Match match = new Match("match-1", null, "team-1", "team-2", 0, 0, MatchStatus.PLANNED, null);
         assertTrue(match.getExternalId().isEmpty());
     }
 
     @Test
     @DisplayName("Should throw exception when creating Match with null id")
     void createMatchWithNullId() {
-        assertThrows(IllegalArgumentException.class, () -> new Match(null, null, "team-1", "team-2", 2, 1, MatchStatus.PLANNED));
+        assertThrows(IllegalArgumentException.class, () -> new Match(null, null, "team-1", "team-2", 2, 1, MatchStatus.PLANNED, null));
     }
 
     @Test
     @DisplayName("Should throw exception when creating Match with blank id")
     void createMatchWithBlankId() {
-        assertThrows(IllegalArgumentException.class, () -> new Match("   ", null, "team-1", "team-2", 2, 1, MatchStatus.PLANNED));
+        assertThrows(IllegalArgumentException.class, () -> new Match("   ", null, "team-1", "team-2", 2, 1, MatchStatus.PLANNED, null));
     }
 
     @Test
     @DisplayName("Should throw exception when creating Match with null homeTeamId")
     void createMatchWithNoHomeTeamId() {
-        assertThrows(IllegalArgumentException.class, () -> new Match("match-1", null, null, "team-2", 2, 1, MatchStatus.PLANNED));
+        assertThrows(IllegalArgumentException.class, () -> new Match("match-1", null, null, "team-2", 2, 1, MatchStatus.PLANNED, null));
     }
 
     @Test
     @DisplayName("Should throw exception when creating Match with blank homeTeamId")
     void createMatchWithBlankHomeTeamId() {
-        assertThrows(IllegalArgumentException.class, () -> new Match("match-1", null, "   ", "team-2", 2, 1, MatchStatus.PLANNED));
+        assertThrows(IllegalArgumentException.class, () -> new Match("match-1", null, "   ", "team-2", 2, 1, MatchStatus.PLANNED, null));
     }
 
     @Test
     @DisplayName("Should throw exception when creating Match with null awayTeamId")
     void createMatchWithNoAwayTeamId() {
-        assertThrows(IllegalArgumentException.class, () -> new Match("match-1", null, "team-1", null, 2, 1, MatchStatus.PLANNED));
+        assertThrows(IllegalArgumentException.class, () -> new Match("match-1", null, "team-1", null, 2, 1, MatchStatus.PLANNED, null));
     }
 
     @Test
     @DisplayName("Should throw exception when creating Match with blank awayTeamId")
     void createMatchWithBlankAwayTeamId() {
-        assertThrows(IllegalArgumentException.class, () -> new Match("match-1", null, "team-1", "   ", 2, 1, MatchStatus.PLANNED));
+        assertThrows(IllegalArgumentException.class, () -> new Match("match-1", null, "team-1", "   ", 2, 1, MatchStatus.PLANNED, null));
     }
 
     @Test
     @DisplayName("Should throw exception when creating Match with negative homeTeamScore")
     void createMatchWithNegativeHomeTeamScore() {
-        assertThrows(IllegalArgumentException.class, () -> new Match("match-1", null, "team-1", "team-2", -1, 1, MatchStatus.PLANNED));
+        assertThrows(IllegalArgumentException.class, () -> new Match("match-1", null, "team-1", "team-2", -1, 1, MatchStatus.PLANNED, null));
     }
 
     @Test
     @DisplayName("Should throw exception when creating Match with negative awayTeamScore")
     void createMatchWithNegativeAwayTeamScore() {
-        assertThrows(IllegalArgumentException.class, () -> new Match("match-1", null, "team-1", "team-2", 2, -1, MatchStatus.PLANNED));
+        assertThrows(IllegalArgumentException.class, () -> new Match("match-1", null, "team-1", "team-2", 2, -1, MatchStatus.PLANNED, null));
     }
 
     @Test
     @DisplayName("Should throw exception when creating Match with null status")
     void createMatchWithNullStatus() {
-        assertThrows(IllegalArgumentException.class, () -> new Match("match-1", null, "team-1", "team-2", 2, 1, null));
+        assertThrows(IllegalArgumentException.class, () -> new Match("match-1", null, "team-1", "team-2", 2, 1, null, null));
     }
 
     @Test
     @DisplayName("Should consider two Matches with same id as equal")
     void twoMatchesWithSameIdAreEqual() {
-        Match match1 = new Match("match-1", null, "team-1", "team-2", 2, 1, MatchStatus.PLANNED);
-        Match match2 = new Match("match-1", null, "team-1", "team-2", 4, 0, MatchStatus.STARTED);
+        Match match1 = new Match("match-1", null, "team-1", "team-2", 2, 1, MatchStatus.PLANNED, null);
+        Match match2 = new Match("match-1", null, "team-1", "team-2", 4, 0, MatchStatus.STARTED, null);
         assertEquals(match1, match2);
     }
 
     @Test
     @DisplayName("Should consider two Matches with different id as not equal")
     void twoMatchesWithDifferentIdAreNotEqual() {
-        Match match1 = new Match("match-1", null, "team-1", "team-2", 2, 1, MatchStatus.PLANNED);
-        Match match2 = new Match("match-2", null, "team-1", "team-2", 2, 1, MatchStatus.PLANNED);
+        Match match1 = new Match("match-1", null, "team-1", "team-2", 2, 1, MatchStatus.PLANNED, null);
+        Match match2 = new Match("match-2", null, "team-1", "team-2", 2, 1, MatchStatus.PLANNED, null);
         assertNotEquals(match1, match2);
     }
 
     @Test
     @DisplayName("Should not be equal for different classes")
     void matchNotEqualToDifferentClass() {
-        Match match = new Match("match-1", null, "team-1", "team-2", 2, 1, MatchStatus.PLANNED);
+        Match match = new Match("match-1", null, "team-1", "team-2", 2, 1, MatchStatus.PLANNED, null);
         assertNotEquals(match, "I am not a match");
     }
 
     @Test
     @DisplayName("Should not be equal against null")
     void matchNotEqualToNull() {
-        Match match = new Match("match-1", null, "team-1", "team-2", 2, 1, MatchStatus.PLANNED);
+        Match match = new Match("match-1", null, "team-1", "team-2", 2, 1, MatchStatus.PLANNED, null);
         assertNotEquals(match, null);
     }
 
     @Test
     @DisplayName("Should have same hash code for two Matches with same id")
     void twoMatchesWithSameIdHaveSameHashCode() {
-        Match match1 = new Match("match-1", null, "team-1", "team-2", 2, 1, MatchStatus.PLANNED);
-        Match match2 = new Match("match-1", null, "team-1", "team-2", 4, 0, MatchStatus.STARTED);
+        Match match1 = new Match("match-1", null, "team-1", "team-2", 2, 1, MatchStatus.PLANNED, null);
+        Match match2 = new Match("match-1", null, "team-1", "team-2", 4, 0, MatchStatus.STARTED, null);
         assertEquals(match1.hashCode(), match2.hashCode());
     }
 
     @Test
     @DisplayName("fromExternal() factory method should carry external id and all fields")
     void fromExternalFactoryMethod() {
-        Match match = Match.fromExternal(42L, "1", "2", 1, 0, MatchStatus.STARTED);
+        Match match = Match.fromExternal(42L, "1", "2", 1, 0, MatchStatus.STARTED, null);
 
         assertNotNull(match.getId());
         assertEquals(Optional.of(42L), match.getExternalId());
@@ -139,9 +139,9 @@ class MatchTest {
     @Test
     @DisplayName("withUpdate() should return a new instance with updated score and status, same id")
     void withUpdateProducesUpdatedMatch() {
-        Match original = new Match("match-1", 10L, "team-1", "team-2", 0, 0, MatchStatus.PLANNED);
+        Match original = new Match("match-1", 10L, "team-1", "team-2", 0, 0, MatchStatus.PLANNED, null);
 
-        Match updated = original.withUpdate(2, 1, MatchStatus.FINISHED);
+        Match updated = original.withUpdate(2, 1, MatchStatus.FINISHED, null);
 
         assertEquals("match-1", updated.getId());
         assertEquals(Optional.of(10L), updated.getExternalId());

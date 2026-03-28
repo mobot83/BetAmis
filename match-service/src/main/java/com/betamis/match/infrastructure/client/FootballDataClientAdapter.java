@@ -43,7 +43,8 @@ public class FootballDataClientAdapter implements MatchDataProvider {
                 String.valueOf(r.homeTeam().id()),
                 String.valueOf(r.awayTeam().id()),
                 homeScore,
-                awayScore
+                awayScore,
+                r.utcDate()
         );
     }
 }

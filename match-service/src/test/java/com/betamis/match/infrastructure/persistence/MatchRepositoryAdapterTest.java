@@ -23,7 +23,7 @@ class MatchRepositoryAdapterTest {
     @Transactional
     @DisplayName("Should persist a match and find it by external id")
     void shouldSaveAndFindByExternalId() {
-        Match match = Match.fromExternal(1001L, "10", "20", 0, 0, MatchStatus.PLANNED);
+        Match match = Match.fromExternal(1001L, "10", "20", 0, 0, MatchStatus.PLANNED, null);
 
         matchRepository.save(match);
 
@@ -40,10 +40,10 @@ class MatchRepositoryAdapterTest {
     @Transactional
     @DisplayName("Should update existing match when saved again with same matchId")
     void shouldUpdateExistingMatchOnSave() {
-        Match original = Match.fromExternal(1002L, "10", "20", 0, 0, MatchStatus.PLANNED);
+        Match original = Match.fromExternal(1002L, "10", "20", 0, 0, MatchStatus.PLANNED, null);
         matchRepository.save(original);
 
-        Match updated = original.withUpdate(3, 1, MatchStatus.FINISHED);
+        Match updated = original.withUpdate(3, 1, MatchStatus.FINISHED, null);
         matchRepository.save(updated);
 
         Optional<Match> found = matchRepository.findByExternalId(1002L);

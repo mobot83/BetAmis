@@ -8,6 +8,8 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "matches")
 public class MatchEntity extends PanacheEntity {
@@ -33,4 +35,7 @@ public class MatchEntity extends PanacheEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     public MatchStatus status;
+
+    @Column(name = "kickoff_at")
+    public Instant kickoffAt;
 }

@@ -1,0 +1,91 @@
+{
+  "consumer": {
+    "name": "notification-service"
+  },
+  "interactions": [
+    {
+      "contents": {
+        "content": {
+          "awayTeamId": "away-team-uuid-1",
+          "homeTeamId": "home-team-uuid-1",
+          "id": "event-uuid-1",
+          "kickoffAt": 1710000000000,
+          "matchId": "match-uuid-1",
+          "occurredAt": 1709990000000
+        },
+        "contentType": "application/json",
+        "encoded": false
+      },
+      "description": "a match scheduled event",
+      "key": "1e652374",
+      "matchingRules": {
+        "body": {
+          "$.awayTeamId": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.homeTeamId": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.id": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.kickoffAt": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "integer"
+              }
+            ]
+          },
+          "$.matchId": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.occurredAt": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "integer"
+              }
+            ]
+          }
+        }
+      },
+      "metadata": {
+        "contentType": "application/json"
+      },
+      "pending": false,
+      "type": "Asynchronous/Messages"
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.6.16"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "match-service"
+  }
+}

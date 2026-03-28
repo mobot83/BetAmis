@@ -1,0 +1,6 @@
+apiVersion: v2
+name: notification-service
+description: BetAmis notification service — match reminders via email and web push
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
